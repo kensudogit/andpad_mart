@@ -72,7 +72,7 @@ function localSetupWhenApiDown(): SetupStatus {
   if (!dbConfigured()) {
     hint =
       'DATABASE_URL is not configured — Java API will not start. ' +
-      'andpad_j service → Variables → Reference → Postgres → DATABASE_URL, then Redeploy.'
+      'andpad_mart service → Variables → Reference → Postgres → DATABASE_URL, then Redeploy.'
   } else if (databaseUrl === 'unresolved' || databasePrivateUrl === 'unresolved') {
     hint = 'DATABASE_URL reference is unresolved (${{...}}). Fix the variable reference and Redeploy.'
   } else if (jwtSecret === 'empty') {

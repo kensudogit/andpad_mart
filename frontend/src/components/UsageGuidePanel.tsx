@@ -27,11 +27,11 @@ const architectureFeatured: FeaturedBlock = {
   badge: 'Architecture',
   title: '統合デプロイ（Railway 本番）',
   body:
-    'Go API と Next.js を同一コンテナで起動。ブラウザは同一オリジンの /graphql · /auth のみ使用し、Next.js が内部 127.0.0.1:8081 へプロキシします。',
+    'Java API と Next.js を同一コンテナで起動。ブラウザは同一オリジンの /graphql · /auth のみ使用し、Next.js が内部 127.0.0.1:8081 へプロキシします。',
   variant: 'architecture',
   items: [
     'Next.js — Web UI · /health（Railway ヘルスチェック）',
-    'Go API — GraphQL · 認証 · 組織 · 案件 · 19 モジュール',
+    'Java API — GraphQL · 認証 · 組織 · 案件 · 19 モジュール · intra-mart 統合',
     'PostgreSQL — 起動時マイグレーション + org_demo シード',
     'テナント分離 — org_id + JWT（sessionStorage）',
     'ローカル上級者向け: docker compose / 6 マイクロサービス構成も可',
@@ -52,11 +52,11 @@ const saasFeatured: FeaturedBlock = {
 }
 
 const techStack = [
-  'GraphQL · gqlgen',
-  'Go 1.25 · chi',
+  'GraphQL · Spring',
+  'Java 21 · Spring Boot',
   'Next.js 15 · Apollo',
-  'PostgreSQL',
-  'JWT · org_id',
+  'PostgreSQL · Flyway',
+  'JWT · org_id · intra-mart',
   'Docker · Railway',
 ] as const
 
@@ -66,7 +66,7 @@ const archDiagram = `Browser
 Next.js :PORT          Railway /health
     │ /graphql /auth /api/*
     ▼
-Go API :8081           内部のみ
+Java API :8081         内部のみ
     │
     ▼
 PostgreSQL             マイグレーション自動適用`
@@ -118,7 +118,7 @@ const L = {
     },
     {
       title: '4. npm ローカル開発（推奨）',
-      body: 'Go API + Next.js のモノリス構成。DATABASE_URL 未設定時はメモリストア（学習のみ）。',
+      body: 'Java API + Next.js のモノリス構成（intra-mart 統合）。DATABASE_URL 未設定時は Java API が起動しません。',
       items: [
         'npm run install:all → cd backend; go mod tidy',
         'npm run dev:monolith — API :8080 + Web :3000',

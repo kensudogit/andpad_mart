@@ -52,7 +52,12 @@ export default function LoginPage() {
         setError(
           isLocalHost
             ? 'API に接続できません。Docker の場合は npm run docker:up で Web(:3001) を再ビルドし、Gateway http://localhost:18080/health を確認してください。'
-            : 'API に接続できません。/status で接続状態を確認してください。',
+            : (
+                <>
+                  API に接続できません。Java API が起動していない可能性があります。{' '}
+                  <Link href="/status">/status</Link> で DATABASE_URL · JWT_SECRET を確認し、Redeploy してください。
+                </>
+              ),
         )
       } else {
         setError(err instanceof Error ? err.message : 'Login failed')
@@ -96,7 +101,7 @@ export default function LoginPage() {
                   </>
                 ) : (
                   <>
-                    <p>Railway（andpad サービス → Variables）:</p>
+                    <p>Railway（<strong>andpad_mart</strong> サービス → Variables）:</p>
                     <ol style={{ margin: '0.5rem 0 0 1rem', padding: 0 }}>
                       <li>
                         <strong>+ New Variable</strong> → Name: <code>DATABASE_URL</code> →{' '}
