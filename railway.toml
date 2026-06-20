@@ -1,0 +1,22 @@
+# ANDPAD Java 版 — unified Railway deploy (git push → auto build)
+#
+# Service Settings:
+#   Root Directory     ->  leave EMPTY (repo root)
+#   Config file path   ->  /railway.toml
+#
+# Required Variables on THIS service (not Postgres):
+#   DATABASE_URL  — Reference from Postgres plugin (postgresql://... or jdbc:postgresql://...)
+#   JWT_SECRET    — long random string, at least 32 characters (not an API key)
+#
+# Do NOT set API_URL. Next.js proxies to 127.0.0.1:8081 inside the container.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.unified"
+watchPatterns = ["frontend/**", "backend/**", "graphql/**", "scripts/**", "Dockerfile.unified"]
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+numReplicas = 1

@@ -1,0 +1,23 @@
+{
+  "name": "andpad-mart",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n api,web \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "cross-env DATABASE_URL=jdbc:postgresql://localhost:5435/andpad DB_USER=andpad DB_PASSWORD=andpad JWT_SECRET=dev-local-secret-minimum-32-characters gradlew.bat :backend:bootRun",
+    "dev:web": "cd frontend && npm run dev",
+    "dev:imart": "cross-env SERVER_PORT=8084 IMART_CONTEXT_PATH=/andpad-imart DATABASE_URL=jdbc:postgresql://localhost:5435/andpad DB_USER=andpad DB_PASSWORD=andpad JWT_SECRET=dev-local-secret-minimum-32-characters gradlew.bat :backend:bootWar",
+    "install:all": "cd frontend && npm install",
+    "test": "gradlew.bat test",
+    "test:backend": "gradlew.bat :backend:test",
+    "test:imart": "gradlew.bat :imart:test",
+    "war": "gradlew.bat :backend:bootWar",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "cross-env": "^7.0.3"
+  }
+}

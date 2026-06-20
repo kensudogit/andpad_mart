@@ -1,0 +1,32 @@
+# Java / Gradle (multi-module)
+.gradle/
+backend/.gradle/
+backend/build/
+backend/bin/
+imart/build/
+build/
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+!backend/gradle/wrapper/gradle-wrapper.jar
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+node_modules/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+.env.*.local

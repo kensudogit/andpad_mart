@@ -1,0 +1,14 @@
+# Web-only service when API is separate (Root Directory: frontend)
+# For unified deploy use repo-root /railway.toml instead.
+# Set API_URL to the api service public HTTPS URL.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+watchPatterns = ["**", "../graphql/**"]
+
+[deploy]
+healthcheckPath = "/status"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+numReplicas = 1

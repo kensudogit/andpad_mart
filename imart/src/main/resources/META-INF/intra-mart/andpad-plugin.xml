@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://www.intra-mart.co.jp/im/plugin"
+        id="andpad-api"
+        name="ANDPAD Construction PM API"
+        version="0.1.0">
+    <description>建設プロジェクト管理 GraphQL API（andpad_j パッケージ移植）</description>
+    <entry-point>jp.andpad.api.AndpadApplication</entry-point>
+    <dependencies>
+        <dependency id="intra-mart-core" version="2023.1"/>
+        <dependency id="intra-mart-web" version="2023.1"/>
+    </dependencies>
+</plugin>

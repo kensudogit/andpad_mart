@@ -1,0 +1,19 @@
+#import "./extended.graphql"
+
+query BoardAnalyticsPage($periodDays: Int) {
+  andpadAnalytics(periodDays: $periodDays) {
+    ...AndpadAnalyticsDashboardFields
+    recordsByWeek
+    projectHealthScore
+  }
+}
+
+mutation GenerateAnalyticsInsight($periodDays: Int) {
+  generateAnalyticsInsight(periodDays: $periodDays) {
+    summary
+    strengths
+    risks
+    recommendations
+    generatedAt
+  }
+}
