@@ -115,26 +115,25 @@ export function BimModuleClient() {
         </div>
       </section>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '1rem' }}>
+      <div className="bim-layout">
         <section className="saas-panel">
           <h2>{ui.bimSelectModel}</h2>
           {models.length === 0 ? (
             <p className="muted">{ui.bimNoModel}</p>
           ) : (
-            <ul className="bim-model-list" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <ul className="bim-model-list">
               {models.map((m) => (
-                <li key={m.id} style={{ marginBottom: '0.5rem' }}>
+                <li key={m.id}>
                   <button
                     type="button"
-                    className={`btn${selected?.id === m.id ? '' : ' btn-ghost'}`}
-                    style={{ width: '100%', textAlign: 'left' }}
+                    className={`btn bim-model-item${selected?.id === m.id ? '' : ' btn-ghost'}`}
                     onClick={() => setSelectedId(m.id)}
                   >
                     <strong>{m.title}</strong>
-                    <div className="muted small">
+                    <span className="bim-model-meta">
                       {m.format} · {m.projectName}
                       {m.fileSizeMb != null ? ` · ${m.fileSizeMb}MB` : ''}
-                    </div>
+                    </span>
                   </button>
                 </li>
               ))}

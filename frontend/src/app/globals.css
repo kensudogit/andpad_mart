@@ -1633,6 +1633,57 @@ html, body {
   max-height: 360px;
 }
 
+.bim-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.bim-model-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bim-model-list .bim-model-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  text-align: left;
+  white-space: normal;
+  gap: 0.25rem;
+  padding: 0.65rem 0.85rem;
+}
+
+.bim-model-list .bim-model-item strong {
+  display: block;
+  width: 100%;
+  font-weight: 600;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.bim-model-list .bim-model-item .bim-model-meta {
+  display: block;
+  width: 100%;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.bim-model-list .bim-model-item:not(.btn-ghost) .bim-model-meta {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.bim-model-list .bim-model-item.btn-ghost .bim-model-meta {
+  color: var(--muted);
+}
+
 .saas-actions {
   display: flex;
   gap: 0.5rem;
