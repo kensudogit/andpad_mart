@@ -1,7 +1,9 @@
 package jp.andpad.api.security;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,6 +17,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import jp.andpad.imart.auth.security.IntraMartAuthFilter;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -23,9 +26,11 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final ObjectProvider<IntraMartAuthFilter> intraMartAuthFilter;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        Optional<IntraMartAuthFilter> imFilter = Optional.ofNullable(intraMartAuthFilter.getIfAvailable());
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -33,8 +38,9 @@ public class SecurityConfig {
                         .requestMatchers("/health", "/status", "/auth/**", "/graphiql", "/graphql")
                         .permitAll()
                         .anyRequest()
-                        .permitAll())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                        .permitAll());
+        imFilter.ifPresent(filter -> http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class));
+        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

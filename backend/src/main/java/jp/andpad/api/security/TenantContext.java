@@ -5,6 +5,8 @@ import java.util.Optional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import jp.andpad.imart.auth.IntraMartSecurityPrincipal;
+
 public final class TenantContext {
 
     public static final String DEMO_ORG_ID = "org_demo";
@@ -17,7 +19,20 @@ public final class TenantContext {
         if (auth != null && auth.getPrincipal() instanceof AuthPrincipal p) {
             return Optional.of(p);
         }
+        if (auth != null && auth.getPrincipal() instanceof IntraMartSecurityPrincipal im) {
+            return Optional.of(fromIntraMart(im));
+        }
         return Optional.empty();
+    }
+
+    public static AuthPrincipal fromIntraMart(IntraMartSecurityPrincipal im) {
+        String role = im.roleIds().contains("andpad-admin") ? "admin" : "member";
+        return new AuthPrincipal(
+                im.userCode(),
+                im.tenantId(),
+                role,
+                im.userCode() + "@imart.local",
+                im.displayName() != null ? im.displayName() : im.userCode());
     }
 
     public static String orgId() {

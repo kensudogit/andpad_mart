@@ -32,6 +32,13 @@ app:
     enabled: false
     plugin-id: andpad-api
     context-path: /andpad-imart
+    auth:
+      enabled: ${IMART_AUTH_ENABLED:false}
+      mode: ${IMART_AUTH_MODE:stub}
+      hybrid-with-jwt: true
+      dev-session-id: dev-imart-session
+      bridge:
+        base-url: ${IMART_BASE_URL:}
   jwt:
     secret: ${JWT_SECRET:dev-only-change-in-production-min-32-chars}
     ttl-hours: 72

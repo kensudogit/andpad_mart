@@ -1,1 +1,2 @@
 jp.andpad.imart.config.IntraMartAutoConfiguration
+jp.andpad.imart.auth.config.IntraMartAuthAutoConfiguration

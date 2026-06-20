@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  * IM ライセンス環境が無い場合に Spring コンテキストを起動できるようにする。
  */
 @Component
-@ConditionalOnProperty(name = "app.imart.enabled", havingValue = "false", matchIfMissing = true)
+@ConditionalOnProperty(name = "app.imart.auth.enabled", havingValue = "false", matchIfMissing = true)
 public class DevIntraMartContext implements IntraMartContextSpi {
 
     @Override

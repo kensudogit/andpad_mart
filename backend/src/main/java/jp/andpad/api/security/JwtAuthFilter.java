@@ -24,6 +24,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        var existing = SecurityContextHolder.getContext().getAuthentication();
+        if (existing != null
+                && existing.getPrincipal()
+                        instanceof jp.andpad.imart.auth.IntraMartSecurityPrincipal) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         String token = extractBearer(request);
         if (token == null) {
             token = extractCookie(request, "dv_token");

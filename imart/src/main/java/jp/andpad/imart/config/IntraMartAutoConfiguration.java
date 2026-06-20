@@ -3,6 +3,7 @@ package jp.andpad.imart.config;
 import jp.andpad.imart.IntraMartPluginRegistrar;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -10,7 +11,10 @@ import org.springframework.context.annotation.Import;
  * backend の {@code jp.andpad.api} と組み合わせて WAR / スタンドアロン両方で動作する。
  */
 @AutoConfiguration
-@ComponentScan(basePackages = "jp.andpad.imart")
+@ComponentScan(
+        basePackages = "jp.andpad.imart",
+        excludeFilters =
+                @ComponentScan.Filter(type = FilterType.REGEX, pattern = "jp\\.andpad\\.imart\\.auth\\..*"))
 @Import(IntraMartPluginRegistrar.class)
 public class IntraMartAutoConfiguration {
 }
