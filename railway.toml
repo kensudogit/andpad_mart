@@ -13,7 +13,7 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.unified"
-watchPatterns = ["frontend/**", "backend/**", "graphql/**", "scripts/**", "Dockerfile.unified"]
+watchPatterns = ["frontend/**", "backend/**", "imart/**", "graphql/**", "scripts/**", "Dockerfile.unified", "settings.gradle.kts", "build.gradle.kts"]
 
 [deploy]
 healthcheckPath = "/health"

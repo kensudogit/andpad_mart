@@ -74,7 +74,7 @@ fi
 
 if [ "$db_configured" -eq 0 ]; then
   echo "[unified] WARNING: DATABASE_URL is not configured — API will not start"
-  echo "[unified]   andpad_j service → Variables → Reference → Postgres → DATABASE_URL"
+  echo "[unified]   andpad_mart service → Variables → Reference → Postgres → DATABASE_URL"
 elif ref_unresolved "${DATABASE_URL:-}"; then
   echo "[unified] WARNING: DATABASE_URL looks like an unresolved Railway reference (\${{...}})"
   echo "[unified]   Fix the variable reference on the app service, then Redeploy"

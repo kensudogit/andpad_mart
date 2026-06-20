@@ -1,14 +1,18 @@
 # All-in-one: Spring Boot API (internal 8081) + Next.js (PORT) for a single Railway service.
 # Root Directory must be empty (repo root). Config: /railway.toml
+# Multi-module: backend + imart (intra-mart integration)
 
 FROM eclipse-temurin:21-jdk-alpine AS java-build
-WORKDIR /app/backend
-COPY backend/gradle gradle
-COPY backend/gradlew backend/gradlew.bat backend/build.gradle backend/settings.gradle ./
-RUN chmod +x gradlew && ./gradlew dependencies --no-daemon || true
-COPY backend/src src
-RUN ./gradlew bootJar --no-daemon -x test && \
-    cp build/libs/andpad-backend-*.jar /app/app.jar
+WORKDIR /app
+COPY gradle gradle
+COPY gradlew gradlew.bat settings.gradle.kts build.gradle.kts ./
+COPY backend/build.gradle.kts backend/build.gradle.kts
+COPY imart/build.gradle.kts imart/build.gradle.kts
+RUN chmod +x gradlew && ./gradlew :backend:dependencies --no-daemon || true
+COPY backend/src backend/src
+COPY imart/src imart/src
+RUN ./gradlew :backend:bootJar --no-daemon -x test && \
+    cp backend/build/libs/andpad-imart.jar /app/app.jar
 
 FROM node:22-alpine AS node-deps
 WORKDIR /app/frontend
