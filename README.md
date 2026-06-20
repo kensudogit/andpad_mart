@@ -112,3 +112,4 @@ intra-mart Accel Platform / Tomcat へデプロイする WAR:
 ```
 
 Docker / Gradle / npm の初期セットアップを自動実行します。
+# andpad_mart
