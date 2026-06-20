@@ -52,12 +52,7 @@ export default function LoginPage() {
         setError(
           isLocalHost
             ? 'API に接続できません。Docker の場合は npm run docker:up で Web(:3001) を再ビルドし、Gateway http://localhost:18080/health を確認してください。'
-            : (
-                <>
-                  API に接続できません。Java API が起動していない可能性があります。{' '}
-                  <Link href="/status">/status</Link> で DATABASE_URL · JWT_SECRET を確認し、Redeploy してください。
-                </>
-              ),
+            : 'Cannot reach API — Java API が起動していない可能性があります。/status で DATABASE_URL · JWT_SECRET を確認し、Redeploy してください。',
         )
       } else {
         setError(err instanceof Error ? err.message : 'Login failed')
