@@ -42,6 +42,9 @@ import jp.andpad.api.domain.Organization;
 import jp.andpad.api.domain.ProjectBudget;
 import jp.andpad.api.domain.ProjectBudgetSummary;
 import jp.andpad.api.domain.ProjectModuleRecord;
+import jp.andpad.api.domain.WorkflowTypes.WorkflowDefinitionView;
+import jp.andpad.api.domain.WorkflowTypes.WorkflowInstanceView;
+import jp.andpad.api.domain.WorkflowTypes.WorkflowTaskView;
 import jp.andpad.api.domain.SaasModule;
 import jp.andpad.api.domain.SaasModuleCode;
 import jp.andpad.api.domain.Session;
@@ -57,6 +60,7 @@ import jp.andpad.api.service.ExtendedService;
 import jp.andpad.api.service.LearningStubService;
 import jp.andpad.api.service.OrganizationService;
 import jp.andpad.api.service.SaasService;
+import jp.andpad.api.service.WorkflowService;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -71,6 +75,7 @@ public class QueryController {
     private final BudgetService budgetService;
     private final ExtendedService extendedService;
     private final ConsultService consultService;
+    private final WorkflowService workflowService;
 
     @QueryMapping
     public Health health() {
@@ -301,5 +306,25 @@ public class QueryController {
     @QueryMapping
     public List<ProjectBudgetSummary> projectBudgetSummaries() {
         return budgetService.listBudgetSummaries();
+    }
+
+    @QueryMapping
+    public List<WorkflowDefinitionView> workflowDefinitions() {
+        return workflowService.listDefinitions();
+    }
+
+    @QueryMapping
+    public List<WorkflowInstanceView> workflowInstances(@Argument String entityType, @Argument String status) {
+        return workflowService.listInstances(entityType, status);
+    }
+
+    @QueryMapping
+    public WorkflowInstanceView workflowInstance(@Argument String id) {
+        return workflowService.getInstance(id);
+    }
+
+    @QueryMapping
+    public List<WorkflowTaskView> myWorkflowTasks() {
+        return workflowService.myPendingTasks();
     }
 }

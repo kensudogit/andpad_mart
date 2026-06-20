@@ -15,6 +15,12 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * HTTP ブリッジ経由の {@code WorkflowAuthUtil} 実装。
+ *
+ * <p>{@code app.imart.auth.mode=http} 時に使用。IM コンテナ内 SSJS スクリプトへ
+ * {@code WorkflowAuthUtil} の各権限判定メソッドを HTTP 経由で委譲する。
+ *
+ * @see IntraMartSsjsBridgeClient
+ * @see IntraMartWorkflowAuthService
  */
 @Service
 @RequiredArgsConstructor
@@ -22,8 +28,10 @@ import lombok.RequiredArgsConstructor;
 @ConditionalOnProperty(name = "app.imart.auth.mode", havingValue = "http")
 public class HttpIntraMartWorkflowAuthService implements IntraMartWorkflowAuthService {
 
+    /** SSJS ブリッジ HTTP クライアント。 */
     private final IntraMartSsjsBridgeClient bridgeClient;
 
+    /** {@inheritDoc} */
     @Override
     public boolean isAuthApply(WorkflowAuthRequest request) {
         return invokeBoolean(
@@ -32,6 +40,7 @@ public class HttpIntraMartWorkflowAuthService implements IntraMartWorkflowAuthSe
                 request.sessionId());
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isAuthProcess(WorkflowAuthRequest request) {
         return invokeBoolean(
@@ -40,6 +49,7 @@ public class HttpIntraMartWorkflowAuthService implements IntraMartWorkflowAuthSe
                 request.sessionId());
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isAuthConfirm(WorkflowAuthRequest request) {
         return invokeBoolean(
@@ -48,6 +58,7 @@ public class HttpIntraMartWorkflowAuthService implements IntraMartWorkflowAuthSe
                 request.sessionId());
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isAuthRefDetail(WorkflowAuthRequest request) {
         return invokeBoolean(
@@ -56,11 +67,13 @@ public class HttpIntraMartWorkflowAuthService implements IntraMartWorkflowAuthSe
                 request.sessionId());
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean canApply(WorkflowAuthRequest request) {
         return invokeBoolean("canApply", List.of(buildApplicationKey(request)), request.sessionId());
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean canProcess(WorkflowAuthRequest request) {
         return invokeBoolean(
@@ -71,12 +84,26 @@ public class HttpIntraMartWorkflowAuthService implements IntraMartWorkflowAuthSe
                 request.sessionId());
     }
 
+    /**
+     * WorkflowAuthUtil の Boolean 戻り値メソッドをブリッジ経由で呼び出す。
+     *
+     * @param method    IM API メソッド名
+     * @param args      メソッド引数
+     * @param sessionId IM セッション ID
+     * @return API 戻り値が {@code true} なら {@code true}
+     */
     private boolean invokeBoolean(String method, List<Object> args, String sessionId) {
         SsjsInvokeResponse response = bridgeClient.invoke(new SsjsInvokeRequest(
                 "im_workflow", "WorkflowAuthUtil", method, args, sessionId, Map.of()));
         return response.success() && Boolean.TRUE.equals(response.result());
     }
 
+    /**
+     * {@code canApply} 用の ApplicationKey 相当マップを構築する。
+     *
+     * @param request ワークフロー権限リクエスト
+     * @return ApplicationKey フィールドマップ
+     */
     private static Map<String, String> buildApplicationKey(WorkflowAuthRequest request) {
         return Map.of(
                 "flowId", nullToEmpty(request.flowId()),
@@ -84,6 +111,12 @@ public class HttpIntraMartWorkflowAuthService implements IntraMartWorkflowAuthSe
                 "authUserCode", nullToEmpty(request.authUserCode()));
     }
 
+    /**
+     * null を空文字に変換する。
+     *
+     * @param value 入力文字列
+     * @return 非 null 文字列
+     */
     private static String nullToEmpty(String value) {
         return value != null ? value : "";
     }

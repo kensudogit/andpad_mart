@@ -17,6 +17,13 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * HTTP ブリッジ経由の {@code LoginSessionManager} 実装。
+ *
+ * <p>{@code app.imart.auth.mode=http} 時に使用。IM コンテナ内 SSJS スクリプトへ
+ * {@code LoginSessionManager.getLoginSessionInfo} / {@code invalidateLoginSession} を
+ * HTTP 経由で委譲する。
+ *
+ * @see IntraMartSsjsBridgeClient
+ * @see IntraMartSessionService
  */
 @Service
 @RequiredArgsConstructor
@@ -24,8 +31,14 @@ import lombok.RequiredArgsConstructor;
 @ConditionalOnProperty(name = "app.imart.auth.mode", havingValue = "http")
 public class HttpIntraMartSessionService implements IntraMartSessionService {
 
+    /** SSJS ブリッジ HTTP クライアント。 */
     private final IntraMartSsjsBridgeClient bridgeClient;
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>IM ブリッジ呼び出し: {@code platform.LoginSessionManager.getLoginSessionInfo(sessionId)}
+     */
     @Override
     @SuppressWarnings("unchecked")
     public Optional<ImLoginSession> getLoginSession(String sessionId) {
@@ -58,6 +71,11 @@ public class HttpIntraMartSessionService implements IntraMartSessionService {
                 true));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>IM ブリッジ呼び出し: {@code platform.LoginSessionManager.invalidateLoginSession(sessionId)}
+     */
     @Override
     public void invalidateSession(String sessionId) {
         bridgeClient.invoke(new SsjsInvokeRequest(
@@ -69,6 +87,12 @@ public class HttpIntraMartSessionService implements IntraMartSessionService {
                 Map.of()));
     }
 
+    /**
+     * オブジェクトを文字列に変換する（null 安全）。
+     *
+     * @param value 変換対象
+     * @return 文字列、または {@code null}
+     */
     private static String stringValue(Object value) {
         return value != null ? value.toString() : null;
     }

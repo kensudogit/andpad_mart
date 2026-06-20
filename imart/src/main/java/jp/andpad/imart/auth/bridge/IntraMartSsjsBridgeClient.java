@@ -11,7 +11,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * intra-mart ランタイム上の SSJS API ブリッジへ HTTP で呼び出すクライアント。
+ * intra-mart SSJS API ブリッジ HTTP クライアント。
+ *
+ * <p>Spring Boot（スタンドアロンまたは WAR 外部）から intra-mart ランタイム上の
+ * SSJS 呼び出しエンドポイントへ {@link SsjsInvokeRequest} を POST し、
+ * {@link SsjsInvokeResponse} を受け取る。
+ *
+ * <p>{@code app.imart.auth.mode=http} かつ {@code app.imart.auth.enabled=true} のときのみ有効。
+ *
+ * @see IntraMartAuthProperties.Bridge
  */
 @Slf4j
 @Component
@@ -20,9 +28,20 @@ import lombok.extern.slf4j.Slf4j;
 @ConditionalOnProperty(name = "app.imart.auth.mode", havingValue = "http")
 public class IntraMartSsjsBridgeClient {
 
+    /** 認証・認可設定（ブリッジ URL・タイムアウト等）。 */
     private final IntraMartAuthProperties properties;
+
+    /** HTTP 通信クライアント。 */
     private final RestClient restClient;
 
+    /**
+     * SSJS API ブリッジを呼び出す。
+     *
+     * <p>呼び出し URL: {@code bridge.baseUrl + bridge.invokePath}
+     *
+     * @param request SSJS 呼び出しリクエスト
+     * @return 呼び出し結果（通信エラー時は {@code success=false}）
+     */
     public SsjsInvokeResponse invoke(SsjsInvokeRequest request) {
         String baseUrl = properties.getBridge().getBaseUrl();
         if (baseUrl == null || baseUrl.isBlank()) {

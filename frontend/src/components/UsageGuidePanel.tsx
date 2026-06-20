@@ -23,6 +23,21 @@ type FeaturedBlock = {
   variant?: 'architecture' | 'saas' | 'default'
 }
 
+const imartFeatured: FeaturedBlock = {
+  badge: 'intra-mart',
+  title: 'IM 認証・認可 & 汎用ワークフロー',
+  body:
+    'intra-mart SSJS API（LoginSessionManager · RoleInfoManager · WorkflowAuthUtil）連携と、任意業務に再利用できる承認フローエンジンです。',
+  variant: 'architecture',
+  items: [
+    'IM 認証 — Cookie imart-session / ヘッダ X-IM-Session-Id',
+    'IM 認可 REST — /auth/imart/session · /roles/certify · /workflow/check',
+    '汎用 WF REST — /api/workflow/definitions · /instances/start · /tasks/my',
+    '組み込みフロー — generic-single-approval · budget-approval · leave-approval 他',
+    'GraphQL — workflowDefinitions · startWorkflow · completeWorkflowTask',
+  ],
+}
+
 const architectureFeatured: FeaturedBlock = {
   badge: 'Architecture',
   title: '統合デプロイ（Railway 本番）',
@@ -31,7 +46,7 @@ const architectureFeatured: FeaturedBlock = {
   variant: 'architecture',
   items: [
     'Next.js — Web UI · /health（Railway ヘルスチェック）',
-    'Java API — GraphQL · 認証 · 組織 · 案件 · 19 モジュール · intra-mart 統合',
+    'Java API — GraphQL · 認証 · 組織 · 案件 · 19 モジュール · IM 認証 · 汎用 WF',
     'PostgreSQL — 起動時マイグレーション + org_demo シード',
     'テナント分離 — org_id + JWT（sessionStorage）',
     'ローカル上級者向け: docker compose / 6 マイクロサービス構成も可',
@@ -57,6 +72,7 @@ const techStack = [
   'Next.js 15 · Apollo',
   'PostgreSQL · Flyway',
   'JWT · org_id · intra-mart',
+  'IM Auth · Workflow',
   'Docker · Railway',
 ] as const
 
@@ -66,7 +82,7 @@ const archDiagram = `Browser
 Next.js :PORT          Railway /health
     │ /graphql /auth /api/*
     ▼
-Java API :8081         内部のみ
+Java API :8081         内部のみ · /auth/imart · /api/workflow
     │
     ▼
 PostgreSQL             マイグレーション自動適用`
@@ -172,6 +188,40 @@ const L = {
         'graphql/schema.graphql → backend go generate · npm run codegen',
         'ローカル GraphiQL http://localhost:8080/graphiql',
         '本番 /graphql · Subscription は同一オリジン WS',
+        'WF Query — workflowDefinitions · workflowInstances · myWorkflowTasks',
+        'WF Mutation — startWorkflow · completeWorkflowTask',
+      ],
+    },
+    {
+      title: '10. intra-mart 認証・認可',
+      body:
+        'IM セッション連携（LoginSessionManager / RoleInfoManager / WorkflowAuthUtil）。デフォルト OFF。JWT と併用可能（IM 優先）。',
+      items: [
+        '有効化 — app.imart.auth.enabled=true（環境変数 IMART_AUTH_ENABLED=true）',
+        'stub モード（ローカル）— IMART_AUTH_MODE=stub · 開発セッション dev-imart-session',
+        'GET /auth/imart/session — ヘッダ X-IM-Session-Id: dev-imart-session',
+        'POST /auth/imart/roles/certify — body {"roleId":"andpad-admin"}',
+        'POST /auth/imart/workflow/check — action: apply / process / approve 等',
+        'http モード（本番 IM）— IMART_AUTH_MODE=http · IMART_BASE_URL + SSJS ブリッジ',
+        'JWT ログイン（/login）は auth 無効時も従来どおり利用可',
+      ],
+    },
+    {
+      title: '11. 汎用ワークフロー',
+      body:
+        '任意 entityType / entityId に紐づく承認フロー。起票 → 承認 → 完了。IM 認可ガードと連携可能。',
+      items: [
+        '定義確認 — GET /api/workflow/definitions（要 JWT）',
+        'フロー開始 — POST /api/workflow/instances/start',
+        '  {"flowId":"generic-single-approval","entityId":"doc-001","title":"稟議","payload":{"amount":100000}}',
+        '承認待ち — GET /api/workflow/tasks/my',
+        '承認/却下 — POST /api/workflow/tasks/{taskId}/complete {"action":"APPROVE","comment":"OK"}',
+        '  action — APPROVE · REJECT · RETURN · CANCEL',
+        '組み込み flowId — generic-single-approval · generic-two-step-approval',
+        '  budget-approval · leave-approval · document-approval',
+        'GraphQL — startWorkflow(input) → myWorkflowTasks → completeWorkflowTask(input)',
+        'IM 連携 — imSystemMatterId を指定すると WorkflowAuthUtil 認可を併用',
+        'デモ org_demo に 5 フロー定義をシード済み（起動後 DemoSeeder）',
       ],
     },
   ] satisfies readonly GuideStep[],
@@ -371,6 +421,8 @@ export function UsageGuidePanel() {
             <figcaption>{L.diagramLabel}</figcaption>
             <pre>{archDiagram}</pre>
           </figure>
+
+          <FeaturedSection block={imartFeatured} />
 
           <FeaturedSection block={saasFeatured} />
 

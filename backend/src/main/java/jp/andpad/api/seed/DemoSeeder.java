@@ -44,6 +44,7 @@ public class DemoSeeder {
         ensureConstructionDemo();
         ensureExtendedDemo();
         ensureBudgetDemo();
+        ensureWorkflowDemo();
     }
 
     private void ensureOrganization() {
@@ -271,6 +272,44 @@ public class DemoSeeder {
                    '設備工事進捗分', 385000000,
                    date_trunc('month', CURRENT_DATE) - interval '3 months' + interval '20 days',
                    'INV-2026-0208', '山田 太郎')
+                ON CONFLICT (id) DO NOTHING
+                """);
+    }
+
+    private void ensureWorkflowDemo() {
+        jdbc.update(
+                """
+                INSERT INTO wf_definitions (id, org_id, flow_id, name, version, entity_type, description)
+                VALUES
+                    ('wfdef_generic_single', 'org_demo', 'generic-single-approval', '汎用単段承認', 1, 'GENERIC', '任意業務に使える1段階承認'),
+                    ('wfdef_generic_two', 'org_demo', 'generic-two-step-approval', '汎用二段承認', 1, 'GENERIC', '上長→部門長の2段階承認'),
+                    ('wfdef_budget', 'org_demo', 'budget-approval', '予算承認', 1, 'PROJECT_BUDGET', '現場責任者→経理の予算承認'),
+                    ('wfdef_leave', 'org_demo', 'leave-approval', '休暇申請', 1, 'LEAVE_REQUEST', '休暇申請の上長承認'),
+                    ('wfdef_doc', 'org_demo', 'document-approval', '書類承認', 1, 'DOCUMENT', '書類レビュー→最終承認')
+                ON CONFLICT (id) DO NOTHING
+                """);
+        jdbc.update(
+                """
+                INSERT INTO wf_steps (id, definition_id, step_key, name, step_order, step_type, assignee_type, assignee_value, im_node_id)
+                VALUES
+                    ('wfstep_gs_submit', 'wfdef_generic_single', 'submit', '起票', 0, 'SUBMIT', 'SUBMITTER', NULL, NULL),
+                    ('wfstep_gs_mgr', 'wfdef_generic_single', 'manager_approval', '上長承認', 1, 'APPROVAL', 'ROLE', 'manager', 'node_manager'),
+                    ('wfstep_gs_end', 'wfdef_generic_single', 'complete', '完了', 99, 'END', 'ANY', NULL, NULL),
+                    ('wfstep_gt_submit', 'wfdef_generic_two', 'submit', '起票', 0, 'SUBMIT', 'SUBMITTER', NULL, NULL),
+                    ('wfstep_gt_mgr', 'wfdef_generic_two', 'manager_approval', '上長承認', 1, 'APPROVAL', 'ROLE', 'manager', 'node_manager'),
+                    ('wfstep_gt_dir', 'wfdef_generic_two', 'director_approval', '部門長承認', 2, 'APPROVAL', 'ROLE', 'admin', 'node_director'),
+                    ('wfstep_gt_end', 'wfdef_generic_two', 'complete', '完了', 99, 'END', 'ANY', NULL, NULL),
+                    ('wfstep_bd_submit', 'wfdef_budget', 'submit', '起票', 0, 'SUBMIT', 'SUBMITTER', NULL, NULL),
+                    ('wfstep_bd_mgr', 'wfdef_budget', 'manager_approval', '現場責任者承認', 1, 'APPROVAL', 'ROLE', 'manager', 'node_budget_mgr'),
+                    ('wfstep_bd_fin', 'wfdef_budget', 'finance_approval', '経理承認', 2, 'APPROVAL', 'ROLE', 'admin', 'node_budget_fin'),
+                    ('wfstep_bd_end', 'wfdef_budget', 'complete', '完了', 99, 'END', 'ANY', NULL, NULL),
+                    ('wfstep_lv_submit', 'wfdef_leave', 'submit', '起票', 0, 'SUBMIT', 'SUBMITTER', NULL, NULL),
+                    ('wfstep_lv_mgr', 'wfdef_leave', 'manager_approval', '上長承認', 1, 'APPROVAL', 'ROLE', 'manager', 'node_leave_mgr'),
+                    ('wfstep_lv_end', 'wfdef_leave', 'complete', '完了', 99, 'END', 'ANY', NULL, NULL),
+                    ('wfstep_dc_submit', 'wfdef_doc', 'submit', '起票', 0, 'SUBMIT', 'SUBMITTER', NULL, NULL),
+                    ('wfstep_dc_rev', 'wfdef_doc', 'reviewer_approval', 'レビュー', 1, 'APPROVAL', 'ROLE', 'manager', 'node_doc_review'),
+                    ('wfstep_dc_fin', 'wfdef_doc', 'final_approval', '最終承認', 2, 'APPROVAL', 'ROLE', 'admin', 'node_doc_final'),
+                    ('wfstep_dc_end', 'wfdef_doc', 'complete', '完了', 99, 'END', 'ANY', NULL, NULL)
                 ON CONFLICT (id) DO NOTHING
                 """);
     }

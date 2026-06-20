@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;
+import jp.andpad.imart.workflow.WorkflowException;
 import jp.andpad.api.security.UnauthorizedException;
 import reactor.core.publisher.Mono;
 
@@ -23,6 +24,13 @@ public class GraphQlExceptionResolver implements DataFetcherExceptionResolver {
                     GraphqlErrorBuilder.newError(env)
                             .errorType(ErrorType.UNAUTHORIZED)
                             .message(unauthorized.getMessage())
+                            .build()));
+        }
+        if (ex instanceof WorkflowException workflow) {
+            return Mono.just(List.of(
+                    GraphqlErrorBuilder.newError(env)
+                            .errorType(ErrorType.BAD_REQUEST)
+                            .message(workflow.getMessage())
                             .build()));
         }
         if (ex instanceof IllegalArgumentException badRequest) {

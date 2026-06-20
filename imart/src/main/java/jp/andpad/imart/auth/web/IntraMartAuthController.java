@@ -22,7 +22,14 @@ import jp.andpad.imart.auth.spi.IntraMartWorkflowAuthService;
 import lombok.RequiredArgsConstructor;
 
 /**
- * intra-mart 認証・認可 REST API。
+ * intra-mart 認証・認可 REST API コントローラ。
+ *
+ * <p>フロントエンドや外部連携から IM セッションの検証、ロール認可、
+ * ワークフロー権限チェックを HTTP で行うためのエンドポイントを提供する。
+ *
+ * <p>ベースパス: {@code /auth/imart}
+ *
+ * @see IntraMartAuthorizationService
  */
 @RestController
 @RequestMapping("/auth/imart")
@@ -30,10 +37,23 @@ import lombok.RequiredArgsConstructor;
 @ConditionalOnProperty(name = "app.imart.auth.enabled", havingValue = "true")
 public class IntraMartAuthController {
 
+    /** 認証設定。 */
     private final IntraMartAuthProperties properties;
+
+    /** 認可ファサード。 */
     private final IntraMartAuthorizationService authorizationService;
+
+    /** ワークフロー権限 SPI。 */
     private final IntraMartWorkflowAuthService workflowAuthService;
 
+    /**
+     * 現在の IM セッション情報を返却する。
+     *
+     * <p>リクエストヘッダー {@code X-IM-Session-Id} にセッション ID を指定する。
+     *
+     * @param sessionHeader IM セッション ID ヘッダー
+     * @return 認証状態・アカウント情報・ロール一覧
+     */
     @GetMapping("/session")
     public ResponseEntity<Map<String, Object>> session(
             @RequestHeader(value = "X-IM-Session-Id", required = false) String sessionHeader) {
@@ -59,6 +79,13 @@ public class IntraMartAuthController {
         }
     }
 
+    /**
+     * 指定ロールの内包判定を行う（{@code RoleInfoManager.certify} 相当）。
+     *
+     * @param sessionHeader IM セッション ID ヘッダー
+     * @param body          リクエストボディ（{@code roleId} 必須）
+     * @return 認可結果（{@code certified: true/false}）
+     */
     @PostMapping("/roles/certify")
     public ResponseEntity<Map<String, Object>> certifyRole(
             @RequestHeader(value = "X-IM-Session-Id", required = false) String sessionHeader,
@@ -72,6 +99,17 @@ public class IntraMartAuthController {
         return ResponseEntity.ok(Map.of("certified", certified, "roleId", roleId));
     }
 
+    /**
+     * ワークフロー権限を判定する（{@code WorkflowAuthUtil} 相当）。
+     *
+     * <p>{@code action} に応じて呼び出す IM API メソッドが変わる:
+     * {@code apply}、{@code process}、{@code confirm}、{@code reference}、
+     * {@code canApply}、{@code canProcess}
+     *
+     * @param sessionHeader IM セッション ID ヘッダー
+     * @param body          権限判定パラメータ
+     * @return 判定結果（{@code allowed: true/false}）
+     */
     @PostMapping("/workflow/check")
     public ResponseEntity<Map<String, Object>> checkWorkflow(
             @RequestHeader(value = "X-IM-Session-Id", required = false) String sessionHeader,
@@ -101,6 +139,12 @@ public class IntraMartAuthController {
         return ResponseEntity.ok(Map.of("allowed", allowed, "action", body.action()));
     }
 
+    /**
+     * IM セッションを無効化する（ログアウト）。
+     *
+     * @param sessionHeader IM セッション ID ヘッダー
+     * @return ログアウト結果
+     */
     @PostMapping("/logout")
     public ResponseEntity<Map<String, Object>> logout(
             @RequestHeader(value = "X-IM-Session-Id", required = false) String sessionHeader) {
@@ -111,6 +155,12 @@ public class IntraMartAuthController {
         return ResponseEntity.ok(Map.of("loggedOut", true));
     }
 
+    /**
+     * セッション ID ヘッダーを解決する。
+     *
+     * @param sessionHeader リクエストヘッダー値
+     * @return トリム済みセッション ID、未指定時は {@code null}
+     */
     private String resolveSessionId(String sessionHeader) {
         if (sessionHeader != null && !sessionHeader.isBlank()) {
             return sessionHeader.trim();
@@ -118,6 +168,18 @@ public class IntraMartAuthController {
         return null;
     }
 
+    /**
+     * ワークフロー権限チェック API のリクエストボディ。
+     *
+     * @param action         判定種別（{@code apply}、{@code process} 等）
+     * @param systemMatterId システム案件 ID
+     * @param userDataId     ユーザデータ ID
+     * @param flowId         フロー ID
+     * @param nodeId         ノード ID
+     * @param applyBaseDate  申請基準日
+     * @param authUserCode   申請権限者コード
+     * @param admorType      管理者種別
+     */
     public record WorkflowCheckBody(
             String action,
             String systemMatterId,

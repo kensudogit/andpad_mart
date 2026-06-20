@@ -8,13 +8,25 @@ import org.springframework.context.annotation.Import;
 
 /**
  * intra-mart 統合モジュールの Spring Boot 自動設定。
- * backend の {@code jp.andpad.api} と組み合わせて WAR / スタンドアロン両方で動作する。
+ *
+ * <p>{@code backend} モジュールの {@code jp.andpad.api} と組み合わせて、
+ * WAR デプロイ（intra-mart コンテナ内）およびスタンドアロン JAR の両方で動作する。
+ *
+ * <p>コンポーネントスキャン対象は {@code jp.andpad.imart} パッケージだが、
+ * 認証サブシステム（{@code jp.andpad.imart.auth}）は除外する。
+ * 認証は {@link jp.andpad.imart.auth.config.IntraMartAuthAutoConfiguration} が
+ * {@code app.imart.auth.enabled=true} のときのみ読み込む。
+ *
+ * @see jp.andpad.imart.auth.config.IntraMartAuthAutoConfiguration
+ * @see IntraMartPluginRegistrar
  */
 @AutoConfiguration
 @ComponentScan(
         basePackages = "jp.andpad.imart",
-        excludeFilters =
-                @ComponentScan.Filter(type = FilterType.REGEX, pattern = "jp\\.andpad\\.imart\\.auth\\..*"))
+        excludeFilters = {
+            @ComponentScan.Filter(type = FilterType.REGEX, pattern = "jp\\.andpad\\.imart\\.auth\\..*"),
+            @ComponentScan.Filter(type = FilterType.REGEX, pattern = "jp\\.andpad\\.imart\\.workflow\\..*")
+        })
 @Import(IntraMartPluginRegistrar.class)
 public class IntraMartAutoConfiguration {
 }

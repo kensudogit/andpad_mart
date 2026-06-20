@@ -353,6 +353,10 @@ type Query {
   costEntries(projectId: ID!, lineItemId: ID): [CostEntry!]!
   budgetDashboard(projectId: ID!): BudgetDashboard!
   projectBudgetSummaries: [ProjectBudgetSummary!]!
+  workflowDefinitions: [WorkflowDefinition!]!
+  workflowInstances(entityType: String, status: String): [WorkflowInstance!]!
+  workflowInstance(id: ID!): WorkflowInstance!
+  myWorkflowTasks: [WorkflowTask!]!
 }
 
 type Mutation {
@@ -388,6 +392,9 @@ type Mutation {
   createCostEntry(input: CreateCostEntryInput!): CostEntry!
   approveProjectBudget(id: ID!): ProjectBudget!
   createCostFromBilling(billingRecordId: ID!, projectId: ID!): CostEntry!
+  startWorkflow(input: StartWorkflowInput!): WorkflowInstance!
+  submitWorkflow(instanceId: ID!, imSessionId: String): WorkflowInstance!
+  completeWorkflowTask(input: CompleteWorkflowTaskInput!): WorkflowInstance!
 }
 
 type Subscription {
@@ -877,4 +884,101 @@ input CreateCostEntryInput {
   entryDate: String
   invoiceNo: String
   recordedBy: String
+}
+
+enum WorkflowInstanceStatus {
+  DRAFT
+  RUNNING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum WorkflowAction {
+  SUBMIT
+  APPROVE
+  REJECT
+  RETURN
+  CANCEL
+}
+
+type WorkflowStep {
+  stepKey: String!
+  name: String!
+  stepOrder: Int!
+  stepType: String!
+  assigneeType: String!
+  assigneeValue: String
+  imNodeId: String
+}
+
+type WorkflowDefinition {
+  id: ID!
+  flowId: String!
+  name: String!
+  entityType: String!
+  version: Int!
+  description: String!
+  steps: [WorkflowStep!]!
+}
+
+type WorkflowTask {
+  id: ID!
+  instanceId: ID!
+  stepKey: String!
+  stepName: String
+  assigneeType: String!
+  assigneeValue: String
+  status: String!
+  actionTaken: String
+  comment: String
+  actedByUserId: String
+  createdAt: String!
+  completedAt: String
+}
+
+type WorkflowHistoryEntry {
+  id: ID!
+  stepKey: String
+  action: String!
+  actorUserId: String!
+  actorName: String!
+  comment: String
+  createdAt: String!
+}
+
+type WorkflowInstance {
+  id: ID!
+  definitionId: ID!
+  flowId: String!
+  flowName: String!
+  entityType: String!
+  entityId: String!
+  status: String!
+  currentStepKey: String
+  title: String!
+  payload: String
+  submitterUserId: String!
+  imSystemMatterId: String
+  tasks: [WorkflowTask!]!
+  history: [WorkflowHistoryEntry!]!
+  createdAt: String!
+  updatedAt: String!
+  completedAt: String
+}
+
+input StartWorkflowInput {
+  flowId: String!
+  entityType: String
+  entityId: String!
+  title: String!
+  payload: String
+  imSystemMatterId: String
+}
+
+input CompleteWorkflowTaskInput {
+  taskId: ID!
+  action: WorkflowAction!
+  comment: String
+  imSessionId: String
 }

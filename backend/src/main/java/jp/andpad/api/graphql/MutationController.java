@@ -46,6 +46,9 @@ import jp.andpad.api.graphql.input.LearningInputs.CreateVideoNoteInput;
 import jp.andpad.api.graphql.input.LearningInputs.SubmitQuizAttemptInput;
 import jp.andpad.api.graphql.input.LearningInputs.UpdateWatchProgressInput;
 import jp.andpad.api.graphql.input.UpdateOrganizationInput;
+import jp.andpad.api.graphql.input.CompleteWorkflowTaskInput;
+import jp.andpad.api.graphql.input.StartWorkflowInput;
+import jp.andpad.api.domain.WorkflowTypes.WorkflowInstanceView;
 import jp.andpad.api.service.BudgetService;
 import jp.andpad.api.service.ConstructionService;
 import jp.andpad.api.service.ConsultService;
@@ -53,7 +56,9 @@ import jp.andpad.api.service.ExtendedService;
 import jp.andpad.api.service.LearningStubService;
 import jp.andpad.api.service.OrganizationService;
 import jp.andpad.api.service.SaasService;
+import jp.andpad.api.service.WorkflowService;
 import jp.andpad.api.util.Dates;
+import jp.andpad.imart.workflow.model.WorkflowAction;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -67,6 +72,7 @@ public class MutationController {
     private final BudgetService budgetService;
     private final ExtendedService extendedService;
     private final ConsultService consultService;
+    private final WorkflowService workflowService;
 
     @MutationMapping
     public Organization updateOrganization(@Argument UpdateOrganizationInput input) {
@@ -227,5 +233,31 @@ public class MutationController {
     @MutationMapping
     public CostEntry createCostFromBilling(@Argument String billingRecordId, @Argument String projectId) {
         return budgetService.createCostFromBilling(billingRecordId, projectId);
+    }
+
+    @MutationMapping
+    public WorkflowInstanceView startWorkflow(@Argument StartWorkflowInput input) {
+        return workflowService.startWorkflow(
+                input.flowId(),
+                input.entityType(),
+                input.entityId(),
+                input.title(),
+                input.payload(),
+                null,
+                input.imSystemMatterId());
+    }
+
+    @MutationMapping
+    public WorkflowInstanceView submitWorkflow(@Argument String instanceId, @Argument String imSessionId) {
+        return workflowService.submitWorkflow(instanceId, imSessionId);
+    }
+
+    @MutationMapping
+    public WorkflowInstanceView completeWorkflowTask(@Argument CompleteWorkflowTaskInput input) {
+        return workflowService.completeTask(
+                input.taskId(),
+                WorkflowAction.valueOf(input.action()),
+                input.comment(),
+                input.imSessionId());
     }
 }

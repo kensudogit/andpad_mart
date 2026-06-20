@@ -92,9 +92,70 @@ intra-mart Accel Platform / Tomcat へデプロイする WAR:
 - **`DevIntraMartContext`**: ライセンス環境が無いローカル開発用スタブ
 - **`IntraMartPluginRegistrar`**: 起動時にプラグイン ID を登録
 - **`META-INF/intra-mart/andpad-plugin.xml`**: IM プラグイン定義
+- **`IntraMartAuthFilter`**: IM セッション認証（LoginSessionManager 相当）
+- **`GenericWorkflowEngine`**: 汎用承認フロー（REST / GraphQL）
 
 本番 IM 環境では `jp.co.intra_mart:intra-mart-core` を `compileOnly` で追加し、
 `IntraMartContextSpi` の本番実装クラスを差し替えてください。
+
+### intra-mart 認証・認可
+
+| 設定 | 説明 |
+|------|------|
+| `app.imart.auth.enabled` | IM セッション認証 ON/OFF（デフォルト `false`） |
+| `app.imart.auth.mode` | `stub`（ローカル）/ `http`（IM ブリッジ） |
+| `IMART_AUTH_ENABLED` | 環境変数での有効化 |
+| `IMART_BASE_URL` | `http` モード時の IM ベース URL |
+
+```powershell
+# ローカル stub モード
+$env:IMART_AUTH_ENABLED="true"
+$env:IMART_AUTH_MODE="stub"
+.\gradlew.bat :backend:bootRun
+
+# セッション確認
+curl -H "X-IM-Session-Id: dev-imart-session" http://localhost:8080/auth/imart/session
+
+# ロール認可
+curl -X POST -H "X-IM-Session-Id: dev-imart-session" `
+  -H "Content-Type: application/json" `
+  -d '{"roleId":"andpad-admin"}' `
+  http://localhost:8080/auth/imart/roles/certify
+```
+
+### 汎用ワークフロー
+
+任意の業務エンティティ（予算・休暇・書類など）に紐づけられる承認フローです。
+
+| flowId | 用途 |
+|--------|------|
+| `generic-single-approval` | 汎用 1 段承認 |
+| `generic-two-step-approval` | 汎用 2 段承認 |
+| `budget-approval` | 予算承認 |
+| `leave-approval` | 休暇申請 |
+| `document-approval` | 書類承認 |
+
+```powershell
+# JWT 取得後（/auth/login）
+$token = "..."  # Bearer トークン
+
+# ワークフロー開始
+curl -X POST -H "Authorization: Bearer $token" `
+  -H "Content-Type: application/json" `
+  -d '{"flowId":"generic-single-approval","entityId":"doc-001","title":"稟議申請","payload":{"amount":100000}}' `
+  http://localhost:8080/api/workflow/instances/start
+
+# 承認待ちタスク
+curl -H "Authorization: Bearer $token" http://localhost:8080/api/workflow/tasks/my
+
+# 承認
+curl -X POST -H "Authorization: Bearer $token" `
+  -H "Content-Type: application/json" `
+  -d '{"action":"APPROVE","comment":"承認"}' `
+  http://localhost:8080/api/workflow/tasks/{taskId}/complete
+```
+
+GraphQL: `workflowDefinitions` · `startWorkflow` · `myWorkflowTasks` · `completeWorkflowTask`
 
 ## `andpad_j` との違い
 
@@ -112,4 +173,3 @@ intra-mart Accel Platform / Tomcat へデプロイする WAR:
 ```
 
 Docker / Gradle / npm の初期セットアップを自動実行します。
-# andpad_mart
