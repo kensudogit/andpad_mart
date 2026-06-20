@@ -6,6 +6,7 @@
 import Link from 'next/link'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { useEffect, useState } from 'react'
+import { DocumentApprovalWorkflowDiagram } from '@/components/DocumentApprovalWorkflowDiagram'
 import {
   ConstructionProjectsDocument,
   CreateProjectModuleRecordDocument,
@@ -88,6 +89,8 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
       </div>
 
       {err && <p className="alert">{err}</p>}
+
+      {slug === 'doc-approval' ? <DocumentApprovalWorkflowDiagram /> : null}
 
       <section className="saas-panel">
         <h2>{ui.moduleNewRecord}</h2>
