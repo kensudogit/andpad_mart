@@ -19,6 +19,22 @@ const nav = [
   { href: '/settings', label: ui.navSettings, short: ui.navSettings },
 ] as const
 
+/** 現在パスに最も一致するナビ項目（最長プレフィックス）を返す */
+function resolveActiveNavHref(pathname: string): string {
+  let matched: string | null = null
+  for (const item of nav) {
+    const href = item.href
+    const isMatch =
+      href === '/'
+        ? pathname === '/'
+        : pathname === href || pathname.startsWith(`${href}/`)
+    if (isMatch && (matched === null || href.length > matched.length)) {
+      matched = href
+    }
+  }
+  return matched ?? '/'
+}
+
 /** アプリ共通シェル（ナビ・トップバー・利用手順） */
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -47,9 +63,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
         <nav className="sidebar-nav">
           {nav.map((item) => {
-            const active =
-              // ホームのみ完全一致、他はプレフィックス一致
-              item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
+            const active = item.href === resolveActiveNavHref(pathname)
             return (
               <Link
                 key={item.href}
