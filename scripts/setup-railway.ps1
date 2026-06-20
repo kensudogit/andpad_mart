@@ -17,6 +17,8 @@ railway link -p discerning-transformation -e production -s andpad_mart | Out-Nul
 railway variable set "DATABASE_URL=$($vars.DATABASE_URL)" -s andpad_mart
 railway variable set "JWT_SECRET=$($vars.JWT_SECRET)" -s andpad_mart
 railway variable set "OPENAI_API_KEY=$($vars.OPENAI_API_KEY)" -s andpad_mart
+railway variable set "IMART_AUTH_ENABLED=true" -s andpad_mart
+railway variable set "IMART_AUTH_MODE=stub" -s andpad_mart
 
 Write-Host "`n=== Deploy ===" -ForegroundColor Cyan
 railway up --detach

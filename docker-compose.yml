@@ -30,6 +30,8 @@ services:
       DB_PASSWORD: andpad
       JWT_SECRET: dev-docker-jwt-secret-minimum-32-characters
       IMART_CONTEXT_PATH: /andpad-imart
+      IMART_AUTH_ENABLED: "true"
+      IMART_AUTH_MODE: stub
     depends_on:
       db:
         condition: service_healthy

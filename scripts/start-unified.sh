@@ -61,6 +61,8 @@ echo "[unified] DATABASE_URL=$(env_state "${DATABASE_URL:-}")"
 echo "[unified] DATABASE_PRIVATE_URL=$(env_state "${DATABASE_PRIVATE_URL:-}")"
 echo "[unified] PGHOST=$(env_state "${PGHOST:-}")"
 echo "[unified] JWT_SECRET=$(env_state "${JWT_SECRET:-}")"
+echo "[unified] IMART_AUTH_ENABLED=$(env_state "${IMART_AUTH_ENABLED:-}")"
+echo "[unified] IMART_AUTH_MODE=$(env_state "${IMART_AUTH_MODE:-}")"
 
 db_configured=0
 if [ -n "${DATABASE_URL:-}" ] && ! ref_unresolved "${DATABASE_URL}"; then
@@ -93,6 +95,9 @@ else
     export DATABASE_PRIVATE_URL="${DATABASE_PRIVATE_URL:-}"
     export JWT_SECRET="${JWT_SECRET:-}"
     export OPENAI_API_KEY="${OPENAI_API_KEY:-}"
+    export IMART_AUTH_ENABLED="${IMART_AUTH_ENABLED:-true}"
+    export IMART_AUTH_MODE="${IMART_AUTH_MODE:-stub}"
+    export IMART_BASE_URL="${IMART_BASE_URL:-}"
     export PGHOST="${PGHOST:-}"
     export PGUSER="${PGUSER:-}"
     export PGPASSWORD="${PGPASSWORD:-}"

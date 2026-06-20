@@ -31,6 +31,7 @@ if (-not $SkipNpm) {
 
 Write-Host "`n=== Setup complete ===" -ForegroundColor Green
 Write-Host "API:  .\gradlew.bat :backend:bootRun"
+Write-Host "      (IM 認証はデフォルト有効 — stub セッション: dev-imart-session)"
 Write-Host "Web:  cd frontend && npm run dev"
 Write-Host "Test: .\gradlew.bat test"
 Write-Host "WAR:  .\gradlew.bat :backend:bootWar  -> backend/build/libs/andpad-imart.war"

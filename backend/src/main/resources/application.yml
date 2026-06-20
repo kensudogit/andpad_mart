@@ -33,10 +33,14 @@ app:
     plugin-id: andpad-api
     context-path: /andpad-imart
     auth:
-      enabled: ${IMART_AUTH_ENABLED:false}
+      enabled: ${IMART_AUTH_ENABLED:true}
       mode: ${IMART_AUTH_MODE:stub}
       hybrid-with-jwt: true
       dev-session-id: dev-imart-session
+      session-cookie: imart-session
+      session-header: X-IM-Session-Id
+      default-role-id: andpad-user
+      admin-role-id: andpad-admin
       bridge:
         base-url: ${IMART_BASE_URL:}
   jwt:

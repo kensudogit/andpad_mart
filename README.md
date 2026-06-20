@@ -102,15 +102,27 @@ intra-mart Accel Platform / Tomcat へデプロイする WAR:
 
 | 設定 | 説明 |
 |------|------|
-| `app.imart.auth.enabled` | IM セッション認証 ON/OFF（デフォルト `false`） |
+| `app.imart.auth.enabled` | IM セッション認証 ON/OFF（デフォルト **`true`**） |
 | `app.imart.auth.mode` | `stub`（ローカル）/ `http`（IM ブリッジ） |
-| `IMART_AUTH_ENABLED` | 環境変数での有効化 |
+| `IMART_AUTH_ENABLED` | 環境変数（デフォルト `true`） |
+| `IMART_AUTH_MODE` | 環境変数（デフォルト `stub`） |
 | `IMART_BASE_URL` | `http` モード時の IM ベース URL |
 
+#### 有効化手順
+
+1. **設定ファイル** — `imart/src/main/resources/intramart.properties` で `app.imart.auth.enabled=true`（既定値）
+2. **application.yml** — `app.imart.auth.enabled: ${IMART_AUTH_ENABLED:true}` により環境変数で上書き可能
+3. **ローカル起動** — 追加設定なしで有効。`.\gradlew.bat :backend:bootRun` 前に `DATABASE_URL` / `JWT_SECRET` を設定
+4. **Docker** — `docker compose up` の api サービスに `IMART_AUTH_ENABLED=true` を設定済み
+5. **Railway** — `.\scripts\setup-railway.ps1` 実行、または Variables に `IMART_AUTH_ENABLED=true` を設定して Redeploy
+6. **動作確認** — 下記 curl で `authenticated: true` を確認
+
 ```powershell
-# ローカル stub モード
-$env:IMART_AUTH_ENABLED="true"
-$env:IMART_AUTH_MODE="stub"
+# ローカル（デフォルトで有効 — 明示設定は任意）
+$env:DATABASE_URL="jdbc:postgresql://localhost:5435/andpad"
+$env:JWT_SECRET="dev-local-secret-minimum-32-characters"
+# $env:IMART_AUTH_ENABLED="true"   # 省略可（デフォルト true）
+# $env:IMART_AUTH_MODE="stub"
 .\gradlew.bat :backend:bootRun
 
 # セッション確認
@@ -121,6 +133,20 @@ curl -X POST -H "X-IM-Session-Id: dev-imart-session" `
   -H "Content-Type: application/json" `
   -d '{"roleId":"andpad-admin"}' `
   http://localhost:8080/auth/imart/roles/certify
+```
+
+#### 無効化
+
+```powershell
+$env:IMART_AUTH_ENABLED="false"
+# Railway: Variables → IMART_AUTH_ENABLED=false → Redeploy
+```
+
+#### 本番 IM 連携（http モード）
+
+```powershell
+$env:IMART_AUTH_MODE="http"
+$env:IMART_BASE_URL="https://im.example.com"
 ```
 
 ### 汎用ワークフロー
