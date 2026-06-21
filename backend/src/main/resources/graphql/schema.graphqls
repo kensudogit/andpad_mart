@@ -358,6 +358,7 @@ type Query {
   workflowInstance(id: ID!): WorkflowInstance!
   myWorkflowTasks: [WorkflowTask!]!
   sentMailMessages(entityType: String, entityId: ID, limit: Int = 50): [SentMailMessage!]!
+  monitoringFlowData(flowIds: [String!]): [MonitoringFlowData!]!
 }
 
 type Mutation {
@@ -997,4 +998,19 @@ type SentMailMessage {
   flowId: String
   sent: Boolean!
   createdAt: String!
+}
+
+type MonitoringFlowData {
+  flowId: String!
+  flowName: String
+  approveCount: String!
+  approveEndCount: String!
+  denyCount: String!
+  discontinueCount: String!
+  matterHandleCount: String!
+  minimumTime: String!
+  maximumTime: String!
+  averageTime: String!
+  amountTime: String!
+  countSum: String
 }

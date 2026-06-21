@@ -1751,6 +1751,111 @@ html, body {
   overflow: auto;
 }
 
+.doc-approval-monitoring-panel {
+  margin-top: 0;
+}
+
+.doc-approval-monitoring-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.doc-approval-monitoring-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.doc-approval-monitoring-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.65rem;
+}
+
+.doc-approval-monitoring-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.35rem 1rem;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.doc-approval-monitoring-meta div {
+  display: flex;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.doc-approval-monitoring-meta dt {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.doc-approval-monitoring-meta dd {
+  margin: 0;
+}
+
+.doc-approval-monitoring-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+}
+
+.doc-approval-monitoring-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.65rem;
+}
+
+.doc-approval-stat {
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.doc-approval-stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+.doc-approval-stat-value {
+  font-size: 1.05rem;
+}
+
+.doc-approval-stat--green {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.doc-approval-stat--rose {
+  border-color: rgba(244, 63, 94, 0.35);
+  background: rgba(244, 63, 94, 0.08);
+}
+
+.doc-approval-stat--amber {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.doc-approval-stat--blue {
+  border-color: rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.doc-approval-stat--indigo {
+  border-color: rgba(99, 102, 241, 0.35);
+  background: rgba(99, 102, 241, 0.08);
+}
+
 .wf-diagram {
   display: flex;
   flex-direction: column;

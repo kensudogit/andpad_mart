@@ -8,6 +8,7 @@ import { useMutation, useQuery } from '@apollo/client/react'
 import { useEffect, useState } from 'react'
 import { DocumentApprovalWorkflowDiagram } from '@/components/DocumentApprovalWorkflowDiagram'
 import { DocApprovalMailPanel } from '@/components/DocApprovalMailPanel'
+import { DocApprovalMonitoringPanel } from '@/components/DocApprovalMonitoringPanel'
 import {
   ConstructionProjectsDocument,
   CreateProjectModuleRecordDocument,
@@ -96,7 +97,6 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
       {err && <p className="alert">{err}</p>}
 
       {slug === 'doc-approval' ? <DocumentApprovalWorkflowDiagram /> : null}
-      {slug === 'doc-approval' ? <DocApprovalMailPanel refreshKey={mailRefreshKey} /> : null}
 
       <section className="saas-panel">
         <h2>{ui.moduleNewRecord}</h2>
@@ -223,6 +223,13 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
           </div>
         )}
       </section>
+
+      {slug === 'doc-approval' ? (
+        <>
+          <DocApprovalMonitoringPanel refreshKey={mailRefreshKey} />
+          <DocApprovalMailPanel refreshKey={mailRefreshKey} />
+        </>
+      ) : null}
     </>
   )
 }

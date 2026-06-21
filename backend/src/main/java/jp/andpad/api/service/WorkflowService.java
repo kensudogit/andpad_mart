@@ -22,6 +22,7 @@ import jp.andpad.imart.workflow.model.WorkflowStepDefinition;
 import jp.andpad.imart.workflow.model.WorkflowTransitionResult;
 import jp.andpad.imart.workflow.spi.WorkflowAuthGuard;
 import jp.andpad.imart.mail.WorkflowMailNotifier;
+import jp.andpad.imart.monitoring.WorkflowMonitoringRecorder;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -31,6 +32,7 @@ public class WorkflowService {
     private final WorkflowRepository workflowRepository;
     private final WorkflowAuthGuard workflowAuthGuard;
     private final WorkflowMailNotifier workflowMailNotifier;
+    private final WorkflowMonitoringRecorder workflowMonitoringRecorder;
 
     public List<WorkflowDefinitionView> listDefinitions() {
         return workflowRepository.listDefinitions(TenantContext.orgId());
@@ -157,6 +159,15 @@ public class WorkflowService {
                 comment,
                 imSessionId);
 
+        workflowMonitoringRecorder.recordTransition(
+                definition,
+                instance.id(),
+                action,
+                result.nextStatus(),
+                instance.createdAt(),
+                updated.completedAt(),
+                imSessionId);
+
         return updated;
     }
 
@@ -209,6 +220,8 @@ public class WorkflowService {
                 result.nextStepKey(),
                 "submitted",
                 imSessionId);
+
+        workflowMonitoringRecorder.ensureFlowMonitoring(definition, imSessionId);
 
         return updated;
     }

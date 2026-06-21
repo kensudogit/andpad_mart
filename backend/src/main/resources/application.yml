@@ -51,6 +51,15 @@ app:
         enabled: ${IMART_MAIL_FILE_ENABLED:true}
         path: ${IMART_MAIL_FILE_PATH:/app/data/mail/messages.log}
       store-in-database: ${IMART_MAIL_STORE_DB:true}
+    monitoring:
+      enabled: ${IMART_MONITORING_ENABLED:true}
+      record-on-transition: ${IMART_MONITORING_RECORD:true}
+      store-in-database: ${IMART_MONITORING_STORE_DB:true}
+      flow-ids:
+        - document-approval
+      file:
+        enabled: ${IMART_MONITORING_FILE_ENABLED:true}
+        path: ${IMART_MONITORING_FILE_PATH:/app/data/monitoring/flow-data.log}
   jwt:
     secret: ${JWT_SECRET:dev-only-change-in-production-min-32-chars}
     ttl-hours: 72

@@ -1,0 +1,20 @@
+fragment MonitoringFlowDataFields on MonitoringFlowData {
+  flowId
+  flowName
+  approveCount
+  approveEndCount
+  denyCount
+  discontinueCount
+  matterHandleCount
+  minimumTime
+  maximumTime
+  averageTime
+  amountTime
+  countSum
+}
+
+query MonitoringFlowData($flowIds: [String!]) {
+  monitoringFlowData(flowIds: $flowIds) {
+    ...MonitoringFlowDataFields
+  }
+}
