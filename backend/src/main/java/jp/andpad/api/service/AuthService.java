@@ -10,6 +10,7 @@ import jp.andpad.api.domain.Session;
 import jp.andpad.api.repository.AuthRepository;
 import jp.andpad.api.repository.AuthRepository.LoginResult;
 import jp.andpad.api.repository.AuthRepository.RegisterInput;
+import jp.andpad.api.seed.OrgSampleDataSeeder;
 import jp.andpad.api.security.AuthPrincipal;
 import jp.andpad.api.security.JwtService;
 import jp.andpad.api.security.TenantContext;
@@ -22,6 +23,7 @@ public class AuthService {
     private final AuthRepository authRepository;
     private final JwtService jwtService;
     private final OrganizationService organizationService;
+    private final OrgSampleDataSeeder orgSampleDataSeeder;
 
     public AuthResponse login(String email, String password) {
         LoginResult result = authRepository.login(email, password)
@@ -31,6 +33,7 @@ public class AuthService {
 
     public AuthResponse register(RegisterInput input) {
         LoginResult result = authRepository.register(input);
+        orgSampleDataSeeder.seedForOrg(result.organization().id());
         return toAuthResponse(result);
     }
 

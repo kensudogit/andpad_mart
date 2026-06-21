@@ -51,14 +51,17 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
   const [person, setPerson] = useState('')
   const [status, setStatus] = useState('OPEN')
   const [amount, setAmount] = useState('')
-  const [projectId, setProjectId] = useState('')
+  const [projectId, setProjectId] = useState('__all__')
   const [mailRefreshKey, setMailRefreshKey] = useState(0)
 
   const { data: projectsData, loading: projectsLoading } = useQuery(ConstructionProjectsDocument, {
     fetchPolicy: 'network-only',
   })
   const { data, loading, error, refetch } = useQuery(ProjectModuleRecordsDocument, {
-    variables: { moduleCode, projectId: projectId || undefined },
+    variables: {
+      moduleCode,
+      projectId: projectId && projectId !== '__all__' ? projectId : undefined,
+    },
     fetchPolicy: 'network-only',
   })
   const [createRecord, { loading: busy, error: mutErr }] = useMutation(CreateProjectModuleRecordDocument, {
@@ -80,7 +83,7 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
 
   useEffect(() => {
     if (!projectId && projects.length > 0) {
-      setProjectId(projects[0].id)
+      setProjectId('__all__')
     }
   }, [projectId, projects])
 
@@ -109,11 +112,14 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
             {projects.length === 0 ? (
               <option value="">{ui.noProjects}</option>
             ) : (
-              projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))
+              <>
+                <option value="__all__">{ui.allProjects}</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </>
             )}
           </select>
           <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={ui.saasTitle} />
@@ -142,7 +148,7 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
           <button
             type="button"
             className="btn"
-            disabled={busy || !title.trim() || !projectId}
+            disabled={busy || !title.trim() || !projectId || projectId === '__all__'}
             onClick={() =>
               createRecord({
                 variables: {
