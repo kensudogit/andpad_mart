@@ -33,9 +33,9 @@ export function DocApprovalMailPanel({ refreshKey = 0 }: DocApprovalMailPanelPro
   const messages = data?.sentMailMessages ?? []
 
   return (
-    <section className="saas-panel doc-approval-mail-panel">
+    <section className="saas-panel doc-approval-mail-panel doc-approval-sub-panel">
       <h2>{ui.docApprovalSentMailTitle}</h2>
-      <p className="muted small">{ui.docApprovalSentMailDesc}</p>
+      <p className="muted small doc-approval-sub-panel-desc">{ui.docApprovalSentMailDesc}</p>
       {loading ? (
         <p className="muted">{ui.boardLoading}</p>
       ) : messages.length === 0 ? (

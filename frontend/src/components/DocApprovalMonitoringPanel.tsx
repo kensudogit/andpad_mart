@@ -50,9 +50,9 @@ export function DocApprovalMonitoringPanel({ refreshKey = 0 }: DocApprovalMonito
   const rows = data?.monitoringFlowData ?? []
 
   return (
-    <section className="saas-panel doc-approval-monitoring-panel">
+    <section className="saas-panel doc-approval-monitoring-panel doc-approval-sub-panel">
       <h2>{ui.docApprovalMonitoringTitle}</h2>
-      <p className="muted small">{ui.docApprovalMonitoringDesc}</p>
+      <p className="muted small doc-approval-sub-panel-desc">{ui.docApprovalMonitoringDesc}</p>
       {loading ? (
         <p className="muted">{ui.boardLoading}</p>
       ) : error ? (
@@ -64,14 +64,14 @@ export function DocApprovalMonitoringPanel({ refreshKey = 0 }: DocApprovalMonito
           {rows.map((row) => (
             <article key={row.flowId} className="doc-approval-monitoring-item">
               <header className="doc-approval-monitoring-head">
-                <div>
+                <div className="doc-approval-monitoring-head-main">
                   <strong>{row.flowName || row.flowId}</strong>
-                  <div className="muted small">{row.flowId}</div>
+                  <span className="muted small">{row.flowId}</span>
                 </div>
-                <div className="doc-approval-monitoring-total">
-                  <span className="muted small">{ui.docApprovalMonitoringTotal}</span>
+                <span className="doc-approval-monitoring-total-badge">
+                  {ui.docApprovalMonitoringTotal}{' '}
                   <strong>{row.countSum || row.approveCount}</strong>
-                </div>
+                </span>
               </header>
               <div className="doc-approval-monitoring-stats">
                 {buildStats(row).map((stat) => (

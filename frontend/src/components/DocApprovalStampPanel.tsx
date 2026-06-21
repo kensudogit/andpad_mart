@@ -30,9 +30,9 @@ export function DocApprovalStampPanel({ refreshKey = 0 }: DocApprovalStampPanelP
   const stamps = data?.matterStamps ?? []
 
   return (
-    <section className="saas-panel doc-approval-stamp-panel">
+    <section className="saas-panel doc-approval-stamp-panel doc-approval-sub-panel">
       <h2>{ui.docApprovalStampTitle}</h2>
-      <p className="muted small">{ui.docApprovalStampDesc}</p>
+      <p className="muted small doc-approval-sub-panel-desc">{ui.docApprovalStampDesc}</p>
       {loading ? (
         <p className="muted">{ui.boardLoading}</p>
       ) : error ? (

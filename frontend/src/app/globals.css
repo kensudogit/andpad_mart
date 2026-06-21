@@ -1692,16 +1692,36 @@ html, body {
   margin-top: 0;
 }
 
+.doc-approval-sub-panel {
+  padding: 0.75rem 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.doc-approval-sub-panel h2 {
+  margin: 0 0 0.35rem;
+  font-size: 0.9375rem;
+}
+
+.doc-approval-sub-panel-desc {
+  margin: 0 0 0.55rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.doc-approval-monitoring-panel {
+  margin-top: 0;
+}
+
 .doc-approval-mail-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .doc-approval-mail-item {
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -1710,16 +1730,20 @@ html, body {
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.35rem 1rem;
-  margin-bottom: 0.65rem;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.doc-approval-mail-head strong {
+  font-size: 0.875rem;
 }
 
 .doc-approval-mail-meta {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.35rem 1rem;
-  margin: 0 0 0.65rem;
-  font-size: 0.875rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.25rem 0.75rem;
+  margin: 0 0 0.45rem;
+  font-size: 0.75rem;
 }
 
 .doc-approval-mail-meta div {
@@ -1740,14 +1764,14 @@ html, body {
 
 .doc-approval-mail-body {
   margin: 0;
-  padding: 0.65rem 0.75rem;
-  border-radius: 6px;
+  padding: 0.45rem 0.55rem;
+  border-radius: 5px;
   background: rgba(0, 0, 0, 0.25);
-  font-size: 0.8125rem;
-  line-height: 1.5;
+  font-size: 0.75rem;
+  line-height: 1.45;
   white-space: pre-wrap;
   word-break: break-word;
-  max-height: 12rem;
+  max-height: 8rem;
   overflow: auto;
 }
 
@@ -1758,13 +1782,13 @@ html, body {
 .doc-approval-stamp-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .doc-approval-stamp-item {
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -1773,57 +1797,89 @@ html, body {
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.35rem 1rem;
-  margin-bottom: 0.65rem;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.doc-approval-stamp-head strong {
+  font-size: 0.875rem;
 }
 
 .doc-approval-stamp-meta {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-  gap: 0.5rem 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.25rem 0.75rem;
   margin: 0;
 }
 
 .doc-approval-stamp-meta div {
   display: grid;
-  gap: 0.15rem;
+  gap: 0.1rem;
 }
 
 .doc-approval-stamp-meta dt {
-  font-size: 0.75rem;
+  font-size: 0.625rem;
   color: var(--muted);
 }
 
 .doc-approval-stamp-meta dd {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   word-break: break-all;
-}
-
-.doc-approval-monitoring-panel {
-  margin-top: 0;
 }
 
 .doc-approval-monitoring-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .doc-approval-monitoring-item {
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
   background: rgba(255, 255, 255, 0.02);
 }
 
 .doc-approval-monitoring-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.35rem 1rem;
-  margin-bottom: 0.65rem;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.45rem;
+}
+
+.doc-approval-monitoring-head-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  min-width: 0;
+}
+
+.doc-approval-monitoring-head-main strong {
+  font-size: 0.875rem;
+}
+
+.doc-approval-monitoring-head-main .small {
+  font-size: 0.6875rem;
+}
+
+.doc-approval-monitoring-total-badge {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  color: var(--muted);
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.doc-approval-monitoring-total-badge strong {
+  font-size: 0.8125rem;
+  color: var(--text);
+  margin-left: 0.15rem;
 }
 
 .doc-approval-monitoring-meta {
@@ -1858,26 +1914,42 @@ html, body {
 
 .doc-approval-monitoring-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 0.65rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+@media (max-width: 720px) {
+  .doc-approval-monitoring-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .doc-approval-stat {
-  border-radius: 8px;
-  padding: 0.65rem 0.75rem;
+  border-radius: 5px;
+  padding: 0.3rem 0.45rem;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.03);
+  min-width: 0;
 }
 
 .doc-approval-stat-label {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.625rem;
   color: var(--muted);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.1rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .doc-approval-stat-value {
-  font-size: 1.05rem;
+  display: block;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .doc-approval-stat--green {
