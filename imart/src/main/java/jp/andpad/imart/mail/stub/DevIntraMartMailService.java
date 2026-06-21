@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import jp.andpad.imart.mail.IntraMartMailProperties;
+import jp.andpad.imart.mail.MailMessageFileWriter;
 import jp.andpad.imart.mail.MailTemplateSupport;
 import jp.andpad.imart.mail.model.MailSendRequest;
 import jp.andpad.imart.mail.model.MailSendResult;
@@ -20,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * ローカル開発用 {@code MailTemplateManager} / {@code MailTemplate} スタブ実装。
  *
- * <p>IM サーバー無しでワークフロー通知メールの内容をログ出力する。
+ * <p>IM サーバー無しでワークフロー通知メールの内容をログ出力し、ファイルへ追記する。
  */
 @Slf4j
 @Service
@@ -30,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DevIntraMartMailService implements IntraMartMailService {
 
     private final IntraMartMailProperties properties;
+    private final MailMessageFileWriter fileWriter;
 
     @Override
     public Optional<MailTemplateData> getTemplate(String mailId, String localeId) {
@@ -55,6 +57,7 @@ public class DevIntraMartMailService implements IntraMartMailService {
                 to,
                 subject,
                 body.replace('\n', ' '));
+        fileWriter.append(request, to, subject, body);
         return MailSendResult.ok(subject, body);
     }
 

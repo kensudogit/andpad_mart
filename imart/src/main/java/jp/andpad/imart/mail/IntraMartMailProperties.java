@@ -26,6 +26,9 @@ public class IntraMartMailProperties {
     /** スタブモード等で送信先未指定時のデフォルト宛先。 */
     private String defaultTo = "dev@andpad.local";
 
+    /** 送信メールのファイル追記設定。 */
+    private final FileStore file = new FileStore();
+
     /** フロー ID ごとのメールテンプレート ID マッピング。 */
     private Map<String, WorkflowMailTemplates> workflow = defaultWorkflowTemplates();
 
@@ -49,5 +52,15 @@ public class IntraMartMailProperties {
         private String approvedMailId;
         private String rejectedMailId;
         private String returnedMailId;
+    }
+
+    /** 送信メールのファイル出力設定。 */
+    @Data
+    public static class FileStore {
+        /** ファイル追記を有効化する。 */
+        private boolean enabled = true;
+
+        /** 追記先ファイルパス（Railway 既定: {@code /app/data/mail/messages.log}）。 */
+        private String path = "/app/data/mail/messages.log";
     }
 }
