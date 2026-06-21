@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import { DocumentApprovalWorkflowDiagram } from '@/components/DocumentApprovalWorkflowDiagram'
 import { DocApprovalMailPanel } from '@/components/DocApprovalMailPanel'
 import { DocApprovalMonitoringPanel } from '@/components/DocApprovalMonitoringPanel'
+import { DocApprovalStampPanel } from '@/components/DocApprovalStampPanel'
 import {
   ConstructionProjectsDocument,
   CreateProjectModuleRecordDocument,
@@ -233,6 +234,7 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
       {slug === 'doc-approval' ? (
         <>
           <DocApprovalMonitoringPanel refreshKey={mailRefreshKey} />
+          <DocApprovalStampPanel refreshKey={mailRefreshKey} />
           <DocApprovalMailPanel refreshKey={mailRefreshKey} />
         </>
       ) : null}

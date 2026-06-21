@@ -24,6 +24,7 @@ import jp.andpad.api.domain.ExtendedTypes.RagAnswer;
 import jp.andpad.api.domain.ExtendedTypes.RagDocument;
 import jp.andpad.api.domain.ExtendedTypes.RagSearchHit;
 import jp.andpad.api.domain.Health;
+import jp.andpad.api.domain.MatterStampView;
 import jp.andpad.api.domain.MonitoringFlowDataView;
 import jp.andpad.api.domain.SentMailMessage;
 import jp.andpad.api.domain.AttendanceRecord;
@@ -62,6 +63,7 @@ import jp.andpad.api.service.ExtendedService;
 import jp.andpad.api.service.LearningStubService;
 import jp.andpad.api.service.OrganizationService;
 import jp.andpad.api.service.SaasService;
+import jp.andpad.api.service.MatterStampService;
 import jp.andpad.api.service.MonitoringFlowService;
 import jp.andpad.api.service.MailMessageService;
 import jp.andpad.api.service.WorkflowService;
@@ -82,6 +84,7 @@ public class QueryController {
     private final WorkflowService workflowService;
     private final MailMessageService mailMessageService;
     private final MonitoringFlowService monitoringFlowService;
+    private final MatterStampService matterStampService;
 
     @QueryMapping
     public Health health() {
@@ -343,5 +346,15 @@ public class QueryController {
     @QueryMapping
     public List<MonitoringFlowDataView> monitoringFlowData(@Argument List<String> flowIds) {
         return monitoringFlowService.listFlowData(flowIds, null);
+    }
+
+    @QueryMapping
+    public List<MatterStampView> matterStamps(
+            @Argument String flowId,
+            @Argument String entityType,
+            @Argument String entityId,
+            @Argument String systemMatterId,
+            @Argument Integer limit) {
+        return matterStampService.listStamps(flowId, entityType, entityId, systemMatterId, limit, null);
     }
 }

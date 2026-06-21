@@ -359,6 +359,13 @@ type Query {
   myWorkflowTasks: [WorkflowTask!]!
   sentMailMessages(entityType: String, entityId: ID, limit: Int = 50): [SentMailMessage!]!
   monitoringFlowData(flowIds: [String!]): [MonitoringFlowData!]!
+  matterStamps(
+    flowId: String
+    entityType: String
+    entityId: ID
+    systemMatterId: String
+    limit: Int = 50
+  ): [MatterStamp!]!
 }
 
 type Mutation {
@@ -1013,4 +1020,26 @@ type MonitoringFlowData {
   averageTime: String!
   amountTime: String!
   countSum: String
+}
+
+type MatterStamp {
+  id: ID
+  systemMatterId: String!
+  no: String
+  nodeId: String
+  processDate: String
+  processId: String
+  stampStr1: String
+  stampStr1Type: String
+  stampStr2: String
+  stampStr2Type: String
+  stampStr3: String
+  stampStr3Type: String
+  stampType: String
+  cancelFlag: String
+  flowId: String
+  entityType: String
+  entityId: String
+  workflowInstanceId: String
+  createdAt: String
 }

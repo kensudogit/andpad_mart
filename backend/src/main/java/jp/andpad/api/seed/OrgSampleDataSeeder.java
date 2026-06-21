@@ -249,6 +249,22 @@ public class OrgSampleDataSeeder {
                 """,
                 orgId,
                 recordId(orgId, "doc"));
+        jdbc.update(
+                """
+                INSERT INTO wf_matter_stamps (
+                    id, org_id, system_matter_id, stamp_no, node_id, process_date, process_id,
+                    stamp_str1, stamp_str1_type, stamp_str2, stamp_str2_type, stamp_str3, stamp_str3_type,
+                    stamp_type, cancel_flag, flow_id, entity_type, entity_id, workflow_instance_id, created_at
+                )
+                VALUES (
+                    'stamp-doc-demo-1', ?, 'im-matter-doc-demo-1', '1', 'final', '2026/06/08 10:30:00', 'APPROVE',
+                    '山田 太郎', 'user', '最終承認', 'node', 'approveEnd', 'type', '0',
+                    'document-approval', 'DOCUMENT', ?, 'wf-doc-demo-1', NOW() - INTERVAL '30 minutes'
+                )
+                ON CONFLICT (id) DO NOTHING
+                """,
+                orgId,
+                recordId(orgId, "doc"));
     }
 
     static String projectId(String orgId, int index) {

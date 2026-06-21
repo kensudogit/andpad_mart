@@ -23,6 +23,7 @@ import jp.andpad.imart.workflow.model.WorkflowTransitionResult;
 import jp.andpad.imart.workflow.spi.WorkflowAuthGuard;
 import jp.andpad.imart.mail.WorkflowMailNotifier;
 import jp.andpad.imart.monitoring.WorkflowMonitoringRecorder;
+import jp.andpad.imart.stamp.WorkflowStampRecorder;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -33,6 +34,7 @@ public class WorkflowService {
     private final WorkflowAuthGuard workflowAuthGuard;
     private final WorkflowMailNotifier workflowMailNotifier;
     private final WorkflowMonitoringRecorder workflowMonitoringRecorder;
+    private final WorkflowStampRecorder workflowStampRecorder;
 
     public List<WorkflowDefinitionView> listDefinitions() {
         return workflowRepository.listDefinitions(TenantContext.orgId());
@@ -166,6 +168,18 @@ public class WorkflowService {
                 result.nextStatus(),
                 instance.createdAt(),
                 updated.completedAt(),
+                imSessionId);
+
+        workflowStampRecorder.recordCompletion(
+                definition,
+                instance.id(),
+                instance.entityType(),
+                instance.entityId(),
+                action,
+                result.nextStatus(),
+                task.stepKey(),
+                principal.name(),
+                instance.imSystemMatterId(),
                 imSessionId);
 
         return updated;

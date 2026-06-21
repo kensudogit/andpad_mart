@@ -1,0 +1,27 @@
+fragment MatterStampFields on MatterStamp {
+  id
+  systemMatterId
+  no
+  nodeId
+  processDate
+  processId
+  stampStr1
+  stampStr1Type
+  stampStr2
+  stampStr2Type
+  stampStr3
+  stampStr3Type
+  stampType
+  cancelFlag
+  flowId
+  entityType
+  entityId
+  workflowInstanceId
+  createdAt
+}
+
+query MatterStamps($flowId: String, $entityType: String, $entityId: ID, $limit: Int) {
+  matterStamps(flowId: $flowId, entityType: $entityType, entityId: $entityId, limit: $limit) {
+    ...MatterStampFields
+  }
+}

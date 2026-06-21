@@ -230,6 +230,17 @@ export const ui = {
   docApprovalMonitoringMinTime: '\u6700\u5c0f\u51e6\u7406\u6642\u9593',
   docApprovalMonitoringMaxTime: '\u6700\u5927\u51e6\u7406\u6642\u9593',
   docApprovalMonitoringLoadFailed: '\u30e2\u30cb\u30bf\u30ea\u30f3\u30b0\u60c5\u5831\u306e\u53d6\u5f97\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002',
+  docApprovalStampTitle: '\u5370\u5f71\u7ba1\u7406',
+  docApprovalStampDesc:
+    'CplMatterStampList \u3067\u7ba1\u7406\u3055\u308c\u308b document-approval \u30d5\u30ed\u30fc\u306e\u5b8c\u4e86\u6848\u4ef6\u5370\u5f71\u3067\u3059\u3002',
+  docApprovalStampEmpty:
+    '\u307e\u3060\u5370\u5f71\u30c7\u30fc\u30bf\u304c\u3042\u308a\u307e\u305b\u3093\u3002\u30ef\u30fc\u30af\u30d5\u30ed\u30fc\u5b8c\u4e86\u5f8c\u306b\u5370\u5f71\u304c\u8868\u793a\u3055\u308c\u307e\u3059\u3002',
+  docApprovalStampLoadFailed: '\u5370\u5f71\u60c5\u5831\u306e\u53d6\u5f97\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002',
+  docApprovalStampActor: '\u5370\u5f71\u6587\u5b57\uFF11',
+  docApprovalStampNode: '\u30ce\u30fc\u30c9',
+  docApprovalStampEntity: '\u5bfe\u8c61ID',
+  docApprovalStampMatter: '\u30b7\u30b9\u30c6\u30e0\u6848\u4ef6ID',
+  docApprovalStampNodeFallback: '\u5370\u5f71\u30ce\u30fc\u30c9',
   modScan3d: '3D\u30b9\u30ad\u30e3\u30f3',
   modBilling: '\u8acb\u6c42\u7ba1\u7406',
   modWorkRate: '\u6b69\u639b\u7ba1\u7406',

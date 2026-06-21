@@ -3,3 +3,4 @@ jp.andpad.imart.auth.config.IntraMartAuthAutoConfiguration
 jp.andpad.imart.workflow.config.WorkflowAutoConfiguration
 jp.andpad.imart.mail.config.MailAutoConfiguration
 jp.andpad.imart.monitoring.config.MonitoringAutoConfiguration
+jp.andpad.imart.stamp.config.StampAutoConfiguration
