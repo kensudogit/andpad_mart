@@ -49,6 +49,7 @@ public class MailMessageFileWriter {
                     StandardCharsets.UTF_8,
                     StandardOpenOption.CREATE,
                     StandardOpenOption.APPEND);
+            log.info("[mail-file] appended to {}", path);
         } catch (IOException ex) {
             log.warn("failed to append mail message to {}: {}", properties.getFile().getPath(), ex.getMessage());
         }
