@@ -43,6 +43,10 @@ app:
       admin-role-id: andpad-admin
       bridge:
         base-url: ${IMART_BASE_URL:}
+    mail:
+      enabled: ${IMART_MAIL_ENABLED:true}
+      locale-id: ${IMART_MAIL_LOCALE:ja}
+      default-to: ${IMART_MAIL_DEFAULT_TO:dev@andpad.local}
   jwt:
     secret: ${JWT_SECRET:dev-only-change-in-production-min-32-chars}
     ttl-hours: 72

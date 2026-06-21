@@ -21,6 +21,7 @@ import jp.andpad.imart.workflow.model.WorkflowInstanceStatus;
 import jp.andpad.imart.workflow.model.WorkflowStepDefinition;
 import jp.andpad.imart.workflow.model.WorkflowTransitionResult;
 import jp.andpad.imart.workflow.spi.WorkflowAuthGuard;
+import jp.andpad.imart.mail.WorkflowMailNotifier;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -29,6 +30,7 @@ public class WorkflowService {
 
     private final WorkflowRepository workflowRepository;
     private final WorkflowAuthGuard workflowAuthGuard;
+    private final WorkflowMailNotifier workflowMailNotifier;
 
     public List<WorkflowDefinitionView> listDefinitions() {
         return workflowRepository.listDefinitions(TenantContext.orgId());
@@ -135,12 +137,26 @@ public class WorkflowService {
                     resolveAssigneeValue(step, instance.submitterUserId()));
         }
 
-        return workflowRepository.updateInstanceState(
+        WorkflowInstanceView updated = workflowRepository.updateInstanceState(
                 TenantContext.orgId(),
                 instance.id(),
                 result.nextStatus(),
                 result.nextStepKey(),
                 result.terminal());
+
+        workflowMailNotifier.notifyTransition(
+                definition,
+                instance.id(),
+                instance.title(),
+                principal.name(),
+                definition.stepByKey(task.stepKey()),
+                action,
+                result.nextStatus(),
+                result.nextStepKey(),
+                comment,
+                imSessionId);
+
+        return updated;
     }
 
     private WorkflowInstanceView submitInstance(String instanceId, String imSessionId) {
@@ -173,12 +189,26 @@ public class WorkflowService {
                 TenantContext.requirePrincipal().name(),
                 "submitted",
                 Map.of());
-        return workflowRepository.updateInstanceState(
+        WorkflowInstanceView updated = workflowRepository.updateInstanceState(
                 TenantContext.orgId(),
                 instance.id(),
                 result.nextStatus(),
                 result.nextStepKey(),
                 result.terminal());
+
+        workflowMailNotifier.notifyTransition(
+                definition,
+                instance.id(),
+                instance.title(),
+                TenantContext.requirePrincipal().name(),
+                definition.stepByKey("submit"),
+                WorkflowAction.SUBMIT,
+                result.nextStatus(),
+                result.nextStepKey(),
+                "submitted",
+                imSessionId);
+
+        return updated;
     }
 
     private static WorkflowContext toContext(WorkflowInstanceView instance) {
