@@ -7,11 +7,11 @@ import java.util.Map;
 import jp.andpad.imart.mail.model.MailTemplateData;
 
 /** メールテンプレート適用ユーティリティ。 */
-final class MailTemplateSupport {
+public final class MailTemplateSupport {
 
     private MailTemplateSupport() {}
 
-    static String applyParameters(String template, Map<String, String> parameters) {
+    public static String applyParameters(String template, Map<String, String> parameters) {
         if (template == null) {
             return "";
         }
@@ -23,7 +23,7 @@ final class MailTemplateSupport {
     }
 
     @SuppressWarnings("unchecked")
-    static MailTemplateData mapTemplateData(String mailId, String localeId, Map<String, Object> raw) {
+    public static MailTemplateData mapTemplateData(String mailId, String localeId, Map<String, Object> raw) {
         if (raw == null) {
             return null;
         }
@@ -42,7 +42,7 @@ final class MailTemplateSupport {
     }
 
     @SuppressWarnings("unchecked")
-    static MailTemplateData mapProcessedMail(Map<String, Object> processed) {
+    public static MailTemplateData mapProcessedMail(Map<String, Object> processed) {
         if (processed == null) {
             return null;
         }
