@@ -78,7 +78,7 @@ public class MatterStampRepository {
             sql.append(" AND system_matter_id = ?");
             args.add(systemMatterId);
         }
-        sql.append(" ORDER BY created_at DESC");
+        sql.append(" ORDER BY created_at ASC, stamp_no ASC");
         int resolvedLimit = limit != null && limit > 0 ? limit : 50;
         sql.append(" LIMIT ?");
         args.add(resolvedLimit);

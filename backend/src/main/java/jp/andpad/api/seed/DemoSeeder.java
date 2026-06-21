@@ -35,6 +35,7 @@ public class DemoSeeder {
         runSection("moduleSamples", () -> {
             orgSampleDataSeeder.seedDemoOrg();
             orgSampleDataSeeder.seedOrgsMissingSampleData();
+            orgSampleDataSeeder.seedMissingMatterStamps();
         });
         runSection("saasBusiness", this::ensureSaasBusinessDemo);
         runSection("budget", this::ensureBudgetDemo);

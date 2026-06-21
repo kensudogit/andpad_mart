@@ -47,9 +47,25 @@ public class OrgSampleDataSeeder {
             if (TenantContext.DEMO_ORG_ID.equals(orgId)) {
                 ensureDemoOnlyArtifacts(orgId);
             }
+            ensureMatterStampSamples(orgId);
             log.info("sample data seeded for org {}", orgId);
         } catch (Exception ex) {
             log.warn("sample data seed failed for org {}: {}", orgId, ex.getMessage());
+        }
+    }
+
+    /** 印影サンプルが未登録の組織へバックフィルする（デモ組織は毎回 upsert）。 */
+    public void seedMissingMatterStamps() {
+        for (String orgId : jdbc.queryForList("SELECT id FROM organizations", String.class)) {
+            if (TenantContext.DEMO_ORG_ID.equals(orgId)) {
+                ensureMatterStampSamples(orgId);
+                continue;
+            }
+            Integer count = jdbc.queryForObject(
+                    "SELECT COUNT(*) FROM wf_matter_stamps WHERE org_id = ?", Integer.class, orgId);
+            if (count == null || count == 0) {
+                ensureMatterStampSamples(orgId);
+            }
         }
     }
 
@@ -249,6 +265,91 @@ public class OrgSampleDataSeeder {
                 """,
                 orgId,
                 recordId(orgId, "doc"));
+    }
+
+    private void ensureMatterStampSamples(String orgId) {
+        String docRecordId = recordId(orgId, "doc");
+        String systemMatterId = stampSystemMatterId(orgId);
+        String wfInstanceId = stampWorkflowInstanceId(orgId);
+
+        upsertMatterStamp(
+                orgId,
+                stampId(orgId, 1),
+                systemMatterId,
+                "1",
+                "review",
+                "2026/06/08 09:15:00",
+                "APPROVE",
+                "佐藤 花子",
+                "user",
+                "レビュー",
+                "node",
+                "approve",
+                "type",
+                "approve",
+                "0",
+                docRecordId,
+                wfInstanceId,
+                "NOW() - INTERVAL '2 hours'");
+        upsertMatterStamp(
+                orgId,
+                stampId(orgId, 2),
+                systemMatterId,
+                "2",
+                "final",
+                "2026/06/08 10:30:00",
+                "APPROVE",
+                "山田 太郎",
+                "user",
+                "最終承認",
+                "node",
+                "approveEnd",
+                "type",
+                "approveEnd",
+                "0",
+                docRecordId,
+                wfInstanceId,
+                "NOW() - INTERVAL '30 minutes'");
+        upsertMatterStamp(
+                orgId,
+                stampId(orgId, 3),
+                systemMatterId,
+                "3",
+                "complete",
+                "2026/06/08 10:31:00",
+                "APPROVE",
+                "システム",
+                "user",
+                "完了",
+                "node",
+                "approveEnd",
+                "type",
+                "approveEnd",
+                "0",
+                docRecordId,
+                wfInstanceId,
+                "NOW() - INTERVAL '29 minutes'");
+    }
+
+    private void upsertMatterStamp(
+            String orgId,
+            String id,
+            String systemMatterId,
+            String stampNo,
+            String nodeId,
+            String processDate,
+            String processId,
+            String stampStr1,
+            String stampStr1Type,
+            String stampStr2,
+            String stampStr2Type,
+            String stampStr3,
+            String stampStr3Type,
+            String stampType,
+            String cancelFlag,
+            String entityId,
+            String workflowInstanceId,
+            String createdAtSql) {
         jdbc.update(
                 """
                 INSERT INTO wf_matter_stamps (
@@ -257,14 +358,48 @@ public class OrgSampleDataSeeder {
                     stamp_type, cancel_flag, flow_id, entity_type, entity_id, workflow_instance_id, created_at
                 )
                 VALUES (
-                    'stamp-doc-demo-1', ?, 'im-matter-doc-demo-1', '1', 'final', '2026/06/08 10:30:00', 'APPROVE',
-                    '山田 太郎', 'user', '最終承認', 'node', 'approveEnd', 'type', '0',
-                    'document-approval', 'DOCUMENT', ?, 'wf-doc-demo-1', NOW() - INTERVAL '30 minutes'
+                    ?, ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?, ?,
+                    ?, ?, 'document-approval', 'DOCUMENT', ?, ?, %s
                 )
-                ON CONFLICT (id) DO NOTHING
-                """,
+                ON CONFLICT (id) DO UPDATE SET
+                    system_matter_id = EXCLUDED.system_matter_id,
+                    stamp_no = EXCLUDED.stamp_no,
+                    node_id = EXCLUDED.node_id,
+                    process_date = EXCLUDED.process_date,
+                    process_id = EXCLUDED.process_id,
+                    stamp_str1 = EXCLUDED.stamp_str1,
+                    stamp_str1_type = EXCLUDED.stamp_str1_type,
+                    stamp_str2 = EXCLUDED.stamp_str2,
+                    stamp_str2_type = EXCLUDED.stamp_str2_type,
+                    stamp_str3 = EXCLUDED.stamp_str3,
+                    stamp_str3_type = EXCLUDED.stamp_str3_type,
+                    stamp_type = EXCLUDED.stamp_type,
+                    cancel_flag = EXCLUDED.cancel_flag,
+                    flow_id = EXCLUDED.flow_id,
+                    entity_type = EXCLUDED.entity_type,
+                    entity_id = EXCLUDED.entity_id,
+                    workflow_instance_id = EXCLUDED.workflow_instance_id,
+                    created_at = EXCLUDED.created_at
+                """
+                        .formatted(createdAtSql),
+                id,
                 orgId,
-                recordId(orgId, "doc"));
+                systemMatterId,
+                stampNo,
+                nodeId,
+                processDate,
+                processId,
+                stampStr1,
+                stampStr1Type,
+                stampStr2,
+                stampStr2Type,
+                stampStr3,
+                stampStr3Type,
+                stampType,
+                cancelFlag,
+                entityId,
+                workflowInstanceId);
     }
 
     static String projectId(String orgId, int index) {
@@ -313,5 +448,26 @@ public class OrgSampleDataSeeder {
             };
         }
         return orgId + "-" + suffix;
+    }
+
+    static String stampId(String orgId, int index) {
+        if (TenantContext.DEMO_ORG_ID.equals(orgId)) {
+            return "stamp-doc-demo-" + index;
+        }
+        return orgId + "-stamp-" + index;
+    }
+
+    static String stampSystemMatterId(String orgId) {
+        if (TenantContext.DEMO_ORG_ID.equals(orgId)) {
+            return "im-matter-doc-demo-1";
+        }
+        return "im-matter-" + orgId + "-doc-1";
+    }
+
+    static String stampWorkflowInstanceId(String orgId) {
+        if (TenantContext.DEMO_ORG_ID.equals(orgId)) {
+            return "wf-doc-demo-1";
+        }
+        return "wf-" + orgId + "-doc-1";
     }
 }
