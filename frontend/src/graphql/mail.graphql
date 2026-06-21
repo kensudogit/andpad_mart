@@ -1,0 +1,20 @@
+fragment SentMailMessageFields on SentMailMessage {
+  id
+  mailId
+  localeId
+  recipients
+  cc
+  subject
+  body
+  entityType
+  entityId
+  flowId
+  sent
+  createdAt
+}
+
+query SentMailMessages($entityType: String, $entityId: ID, $limit: Int) {
+  sentMailMessages(entityType: $entityType, entityId: $entityId, limit: $limit) {
+    ...SentMailMessageFields
+  }
+}

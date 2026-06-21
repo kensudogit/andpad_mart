@@ -51,6 +51,7 @@ class WorkflowMailNotifierTest {
         notifier.notifyTransition(
                 definition,
                 "inst-1",
+                "rec-42",
                 "安全書類",
                 "申請者",
                 submitStep,
@@ -64,5 +65,6 @@ class WorkflowMailNotifierTest {
         verify(mailService).send(captor.capture());
         assertThat(captor.getValue().mailId()).isEqualTo("andpad-doc-submit");
         assertThat(captor.getValue().parameters()).containsEntry("title", "安全書類");
+        assertThat(captor.getValue().parameters()).containsEntry("entityId", "rec-42");
     }
 }

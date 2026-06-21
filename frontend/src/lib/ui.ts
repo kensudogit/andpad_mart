@@ -207,6 +207,13 @@ export const ui = {
   docApprovalActionCancel: 'CANCEL \u53d6\u6d88',
   docApprovalStatusRejected: '\u5374\u4e0b',
   docApprovalStatusCancelled: '\u53d6\u6d88',
+  docApprovalSentMailTitle: '\u9001\u4fe1\u30e1\u30c3\u30bb\u30fc\u30b8\u78ba\u8a8d',
+  docApprovalSentMailDesc:
+    'PostgreSQL \u306b\u4fdd\u5b58\u3055\u308c\u305f\u8cc7\u6599\u627f\u8a8d\u901a\u77e5\u30e1\u30fc\u30eb\u306e\u4e00\u89a7\u3067\u3059\u3002',
+  docApprovalSentMailEmpty: '\u307e\u3060\u9001\u4fe1\u30e1\u30c3\u30bb\u30fc\u30b8\u304c\u3042\u308a\u307e\u305b\u3093\u3002\u8a18\u9332\u3092\u767b\u9332\u3059\u308b\u3068\u901a\u77e5\u30e1\u30fc\u30eb\u304c\u8868\u793a\u3055\u308c\u307e\u3059\u3002',
+  docApprovalMailTo: '\u5b9b\u5148',
+  docApprovalMailTemplate: '\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8',
+  docApprovalMailEntity: '\u5bfe\u8c61ID',
   modScan3d: '3D\u30b9\u30ad\u30e3\u30f3',
   modBilling: '\u8acb\u6c42\u7ba1\u7406',
   modWorkRate: '\u6b69\u639b\u7ba1\u7406',

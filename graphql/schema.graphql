@@ -353,6 +353,7 @@ type Query {
   costEntries(projectId: ID!, lineItemId: ID): [CostEntry!]!
   budgetDashboard(projectId: ID!): BudgetDashboard!
   projectBudgetSummaries: [ProjectBudgetSummary!]!
+  sentMailMessages(entityType: String, entityId: ID, limit: Int = 50): [SentMailMessage!]!
 }
 
 type Mutation {
@@ -877,4 +878,19 @@ input CreateCostEntryInput {
   entryDate: String
   invoiceNo: String
   recordedBy: String
+}
+
+type SentMailMessage {
+  id: ID!
+  mailId: String
+  localeId: String
+  recipients: String!
+  cc: String!
+  subject: String!
+  body: String!
+  entityType: String
+  entityId: String
+  flowId: String
+  sent: Boolean!
+  createdAt: String!
 }

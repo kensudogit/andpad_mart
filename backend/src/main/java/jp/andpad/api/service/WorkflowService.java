@@ -147,6 +147,7 @@ public class WorkflowService {
         workflowMailNotifier.notifyTransition(
                 definition,
                 instance.id(),
+                instance.entityId(),
                 instance.title(),
                 principal.name(),
                 definition.stepByKey(task.stepKey()),
@@ -199,6 +200,7 @@ public class WorkflowService {
         workflowMailNotifier.notifyTransition(
                 definition,
                 instance.id(),
+                instance.entityId(),
                 instance.title(),
                 TenantContext.requirePrincipal().name(),
                 definition.stepByKey("submit"),

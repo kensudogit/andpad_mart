@@ -25,9 +25,11 @@ class DevIntraMartMailServiceTest {
         properties.setDefaultTo("test@example.com");
         properties.getFile().setEnabled(true);
         properties.getFile().setPath(mailFile.toString());
+        properties.setStoreInDatabase(false);
 
-        DevIntraMartMailService service =
-                new DevIntraMartMailService(properties, new MailMessageFileWriter(properties));
+        MailMessagePersister persister = new MailMessagePersister(
+                properties, new MailMessageFileWriter(properties), new NoopSentMailRecorder());
+        DevIntraMartMailService service = new DevIntraMartMailService(properties, persister);
 
         MailSendResult result = service.send(new MailSendRequest(
                 "dev-imart-session",

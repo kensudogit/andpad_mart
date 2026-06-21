@@ -357,6 +357,7 @@ type Query {
   workflowInstances(entityType: String, status: String): [WorkflowInstance!]!
   workflowInstance(id: ID!): WorkflowInstance!
   myWorkflowTasks: [WorkflowTask!]!
+  sentMailMessages(entityType: String, entityId: ID, limit: Int = 50): [SentMailMessage!]!
 }
 
 type Mutation {
@@ -981,4 +982,19 @@ input CompleteWorkflowTaskInput {
   action: WorkflowAction!
   comment: String
   imSessionId: String
+}
+
+type SentMailMessage {
+  id: ID!
+  mailId: String
+  localeId: String
+  recipients: String!
+  cc: String!
+  subject: String!
+  body: String!
+  entityType: String
+  entityId: String
+  flowId: String
+  sent: Boolean!
+  createdAt: String!
 }

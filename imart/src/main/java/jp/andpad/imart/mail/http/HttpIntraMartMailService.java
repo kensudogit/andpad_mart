@@ -12,7 +12,7 @@ import jp.andpad.imart.auth.bridge.IntraMartSsjsBridgeClient;
 import jp.andpad.imart.auth.bridge.SsjsInvokeRequest;
 import jp.andpad.imart.auth.bridge.SsjsInvokeResponse;
 import jp.andpad.imart.mail.IntraMartMailProperties;
-import jp.andpad.imart.mail.MailMessageFileWriter;
+import jp.andpad.imart.mail.MailMessagePersister;
 import jp.andpad.imart.mail.MailTemplateSupport;
 import jp.andpad.imart.mail.model.MailSendRequest;
 import jp.andpad.imart.mail.model.MailSendResult;
@@ -34,7 +34,7 @@ public class HttpIntraMartMailService implements IntraMartMailService {
 
     private final IntraMartMailProperties properties;
     private final IntraMartSsjsBridgeClient bridgeClient;
-    private final MailMessageFileWriter fileWriter;
+    private final MailMessagePersister persister;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -125,7 +125,7 @@ public class HttpIntraMartMailService implements IntraMartMailService {
         if (!sent.success()) {
             return MailSendResult.fail("MailSender.send failed: " + sent.error());
         }
-        fileWriter.append(request, to, rendered.subjectTemplate(), rendered.bodyTemplate());
+        persister.persist(request, to, rendered.subjectTemplate(), rendered.bodyTemplate(), true);
         return MailSendResult.ok(rendered.subjectTemplate(), rendered.bodyTemplate());
     }
 

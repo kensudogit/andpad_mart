@@ -20,6 +20,9 @@ public class IntraMartMailProperties {
     /** メール通知を有効化する。 */
     private boolean enabled = true;
 
+    /** 送信メールを PostgreSQL に保存する。 */
+    private boolean storeInDatabase = true;
+
     /** メールテンプレート適用ロケール ID。 */
     private String localeId = "ja";
 

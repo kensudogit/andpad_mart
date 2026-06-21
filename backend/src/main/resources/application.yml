@@ -50,6 +50,7 @@ app:
       file:
         enabled: ${IMART_MAIL_FILE_ENABLED:true}
         path: ${IMART_MAIL_FILE_PATH:/app/data/mail/messages.log}
+      store-in-database: ${IMART_MAIL_STORE_DB:true}
   jwt:
     secret: ${JWT_SECRET:dev-only-change-in-production-min-32-chars}
     ttl-hours: 72

@@ -24,6 +24,7 @@ import jp.andpad.api.domain.ExtendedTypes.RagAnswer;
 import jp.andpad.api.domain.ExtendedTypes.RagDocument;
 import jp.andpad.api.domain.ExtendedTypes.RagSearchHit;
 import jp.andpad.api.domain.Health;
+import jp.andpad.api.domain.SentMailMessage;
 import jp.andpad.api.domain.AttendanceRecord;
 import jp.andpad.api.domain.LeaveRequest;
 import jp.andpad.api.domain.LearningTypes.AnalyticsBoard;
@@ -60,6 +61,7 @@ import jp.andpad.api.service.ExtendedService;
 import jp.andpad.api.service.LearningStubService;
 import jp.andpad.api.service.OrganizationService;
 import jp.andpad.api.service.SaasService;
+import jp.andpad.api.service.MailMessageService;
 import jp.andpad.api.service.WorkflowService;
 import lombok.RequiredArgsConstructor;
 
@@ -76,6 +78,7 @@ public class QueryController {
     private final ExtendedService extendedService;
     private final ConsultService consultService;
     private final WorkflowService workflowService;
+    private final MailMessageService mailMessageService;
 
     @QueryMapping
     public Health health() {
@@ -326,5 +329,11 @@ public class QueryController {
     @QueryMapping
     public List<WorkflowTaskView> myWorkflowTasks() {
         return workflowService.myPendingTasks();
+    }
+
+    @QueryMapping
+    public List<SentMailMessage> sentMailMessages(
+            @Argument String entityType, @Argument String entityId, @Argument Integer limit) {
+        return mailMessageService.listSentMessages(entityType, entityId, limit);
     }
 }

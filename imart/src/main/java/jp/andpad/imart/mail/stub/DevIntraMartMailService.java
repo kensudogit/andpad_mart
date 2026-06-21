@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import jp.andpad.imart.mail.IntraMartMailProperties;
-import jp.andpad.imart.mail.MailMessageFileWriter;
+import jp.andpad.imart.mail.MailMessagePersister;
 import jp.andpad.imart.mail.MailTemplateSupport;
 import jp.andpad.imart.mail.model.MailSendRequest;
 import jp.andpad.imart.mail.model.MailSendResult;
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DevIntraMartMailService implements IntraMartMailService {
 
     private final IntraMartMailProperties properties;
-    private final MailMessageFileWriter fileWriter;
+    private final MailMessagePersister persister;
 
     @Override
     public Optional<MailTemplateData> getTemplate(String mailId, String localeId) {
@@ -57,7 +57,7 @@ public class DevIntraMartMailService implements IntraMartMailService {
                 to,
                 subject,
                 body.replace('\n', ' '));
-        fileWriter.append(request, to, subject, body);
+        persister.persist(request, to, subject, body, true);
         return MailSendResult.ok(subject, body);
     }
 

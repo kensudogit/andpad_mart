@@ -33,6 +33,7 @@ public class WorkflowMailNotifier {
     public void notifyTransition(
             WorkflowDefinition definition,
             String instanceId,
+            String entityId,
             String title,
             String submitterName,
             WorkflowStepDefinition currentStep,
@@ -53,6 +54,8 @@ public class WorkflowMailNotifier {
         params.put("title", nullToEmpty(title));
         params.put("flowName", nullToEmpty(definition.name()));
         params.put("flowId", nullToEmpty(definition.flowId()));
+        params.put("entityType", nullToEmpty(definition.entityType()));
+        params.put("entityId", nullToEmpty(entityId));
         params.put("instanceId", nullToEmpty(instanceId));
         params.put("submitterName", nullToEmpty(submitterName));
         params.put("stepName", currentStep != null ? nullToEmpty(currentStep.name()) : "");

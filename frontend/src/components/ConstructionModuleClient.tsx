@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { useEffect, useState } from 'react'
 import { DocumentApprovalWorkflowDiagram } from '@/components/DocumentApprovalWorkflowDiagram'
+import { DocApprovalMailPanel } from '@/components/DocApprovalMailPanel'
 import {
   ConstructionProjectsDocument,
   CreateProjectModuleRecordDocument,
@@ -50,6 +51,7 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
   const [status, setStatus] = useState('OPEN')
   const [amount, setAmount] = useState('')
   const [projectId, setProjectId] = useState('')
+  const [mailRefreshKey, setMailRefreshKey] = useState(0)
 
   const { data: projectsData, loading: projectsLoading } = useQuery(ConstructionProjectsDocument, {
     fetchPolicy: 'network-only',
@@ -65,6 +67,9 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
       setPerson('')
       setAmount('')
       refetch()
+      if (slug === 'doc-approval') {
+        setMailRefreshKey((k) => k + 1)
+      }
     },
   })
 
@@ -91,6 +96,7 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
       {err && <p className="alert">{err}</p>}
 
       {slug === 'doc-approval' ? <DocumentApprovalWorkflowDiagram /> : null}
+      {slug === 'doc-approval' ? <DocApprovalMailPanel refreshKey={mailRefreshKey} /> : null}
 
       <section className="saas-panel">
         <h2>{ui.moduleNewRecord}</h2>
