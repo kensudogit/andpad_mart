@@ -1,0 +1,28 @@
+fragment AsyncProcessStatusFields on AsyncProcessStatus {
+  id
+  acceptId
+  asyncProcStatus
+  authUserCode
+  executeUserCode
+  flowId
+  matterName
+  matterNumber
+  message
+  nodeId
+  procComment
+  procDate
+  procType
+  queueId
+  subMessage
+  systemMatterId
+  entityType
+  entityId
+  workflowInstanceId
+  updatedAt
+}
+
+query AsyncProcessStatusData($flowIds: [String!], $systemMatterIds: [String!], $limit: Int) {
+  asyncProcessStatusData(flowIds: $flowIds, systemMatterIds: $systemMatterIds, limit: $limit) {
+    ...AsyncProcessStatusFields
+  }
+}

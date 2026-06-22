@@ -24,6 +24,8 @@ import jp.andpad.api.domain.ExtendedTypes.RagAnswer;
 import jp.andpad.api.domain.ExtendedTypes.RagDocument;
 import jp.andpad.api.domain.ExtendedTypes.RagSearchHit;
 import jp.andpad.api.domain.Health;
+import jp.andpad.api.domain.AsyncProcessStatusView;
+import jp.andpad.api.domain.CnfmActvMatterView;
 import jp.andpad.api.domain.MatterStampView;
 import jp.andpad.api.domain.MonitoringFlowDataView;
 import jp.andpad.api.domain.SentMailMessage;
@@ -65,6 +67,8 @@ import jp.andpad.api.service.ExtendedService;
 import jp.andpad.api.service.LearningStubService;
 import jp.andpad.api.service.OrganizationService;
 import jp.andpad.api.service.SaasService;
+import jp.andpad.api.service.AsyncProcessService;
+import jp.andpad.api.service.CnfmActvMatterService;
 import jp.andpad.api.service.MatterStampService;
 import jp.andpad.api.service.MonitoringFlowService;
 import jp.andpad.api.security.TenantContext;
@@ -88,6 +92,8 @@ public class QueryController {
     private final WorkflowService workflowService;
     private final MailMessageService mailMessageService;
     private final MonitoringFlowService monitoringFlowService;
+    private final AsyncProcessService asyncProcessService;
+    private final CnfmActvMatterService cnfmActvMatterService;
     private final MatterStampService matterStampService;
     private final TenantApplicationService tenantApplicationService;
 
@@ -351,6 +357,28 @@ public class QueryController {
     @QueryMapping
     public List<MonitoringFlowDataView> monitoringFlowData(@Argument List<String> flowIds) {
         return monitoringFlowService.listFlowData(flowIds, null);
+    }
+
+    @QueryMapping
+    public List<AsyncProcessStatusView> asyncProcessStatusData(
+            @Argument List<String> flowIds,
+            @Argument List<String> systemMatterIds,
+            @Argument Integer limit) {
+        return asyncProcessService.listStatus(flowIds, systemMatterIds, limit, null);
+    }
+
+    @QueryMapping
+    public List<CnfmActvMatterView> cnfmActvMatters(@Argument List<String> flowIds, @Argument Integer limit) {
+        return cnfmActvMatterService.listConfirmMatters(flowIds, limit, null);
+    }
+
+    @QueryMapping
+    public List<CnfmActvMatterView> lumpCnfmActvMatters(
+            @Argument List<String> flowIds,
+            @Argument Boolean noOrgzConditionFlag,
+            @Argument Integer limit) {
+        return cnfmActvMatterService.listLumpConfirmMatters(
+                flowIds, limit, Boolean.TRUE.equals(noOrgzConditionFlag), null);
     }
 
     @QueryMapping

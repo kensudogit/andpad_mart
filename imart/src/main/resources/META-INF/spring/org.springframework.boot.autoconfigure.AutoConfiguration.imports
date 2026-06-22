@@ -4,3 +4,5 @@ jp.andpad.imart.workflow.config.WorkflowAutoConfiguration
 jp.andpad.imart.mail.config.MailAutoConfiguration
 jp.andpad.imart.monitoring.config.MonitoringAutoConfiguration
 jp.andpad.imart.stamp.config.StampAutoConfiguration
+jp.andpad.imart.asyncprocess.config.AsyncProcessAutoConfiguration
+jp.andpad.imart.cnfmactv.config.CnfmActvMatterAutoConfiguration

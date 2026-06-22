@@ -28,7 +28,9 @@ import org.springframework.context.annotation.Import;
             @ComponentScan.Filter(type = FilterType.REGEX, pattern = "jp\\.andpad\\.imart\\.workflow\\..*"),
             @ComponentScan.Filter(type = FilterType.REGEX, pattern = "jp\\.andpad\\.imart\\.mail\\..*"),
             @ComponentScan.Filter(type = FilterType.REGEX, pattern = "jp\\.andpad\\.imart\\.monitoring\\..*"),
-            @ComponentScan.Filter(type = FilterType.REGEX, pattern = "jp\\.andpad\\.imart\\.stamp\\..*")
+            @ComponentScan.Filter(type = FilterType.REGEX, pattern = "jp\\.andpad\\.imart\\.stamp\\..*"),
+            @ComponentScan.Filter(type = FilterType.REGEX, pattern = "jp\\.andpad\\.imart\\.asyncprocess\\..*"),
+            @ComponentScan.Filter(type = FilterType.REGEX, pattern = "jp\\.andpad\\.imart\\.cnfmactv\\..*")
         })
 @Import(IntraMartPluginRegistrar.class)
 public class IntraMartAutoConfiguration {

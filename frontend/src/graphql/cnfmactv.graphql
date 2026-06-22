@@ -1,0 +1,29 @@
+fragment CnfmActvMatterFields on CnfmActvMatter {
+  id
+  listType
+  systemMatterId
+  flowId
+  flowName
+  matterName
+  matterNumber
+  nodeId
+  applyAuthUserCode
+  applyAuthUserName
+  applyDate
+  arrivedDate
+  confirmCplFlag
+  priorityLevel
+  updatedAt
+}
+
+query CnfmActvMatters($flowIds: [String!], $limit: Int) {
+  cnfmActvMatters(flowIds: $flowIds, limit: $limit) {
+    ...CnfmActvMatterFields
+  }
+}
+
+query LumpCnfmActvMatters($flowIds: [String!], $noOrgzConditionFlag: Boolean, $limit: Int) {
+  lumpCnfmActvMatters(flowIds: $flowIds, noOrgzConditionFlag: $noOrgzConditionFlag, limit: $limit) {
+    ...CnfmActvMatterFields
+  }
+}

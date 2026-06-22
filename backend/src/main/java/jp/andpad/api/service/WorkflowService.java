@@ -22,6 +22,7 @@ import jp.andpad.imart.workflow.model.WorkflowStepDefinition;
 import jp.andpad.imart.workflow.model.WorkflowTransitionResult;
 import jp.andpad.imart.workflow.spi.WorkflowAuthGuard;
 import jp.andpad.imart.mail.WorkflowMailNotifier;
+import jp.andpad.imart.asyncprocess.WorkflowAsyncProcessRecorder;
 import jp.andpad.imart.monitoring.WorkflowMonitoringRecorder;
 import jp.andpad.imart.stamp.WorkflowStampRecorder;
 import org.springframework.context.annotation.Lazy;
@@ -34,6 +35,7 @@ public class WorkflowService {
     private final WorkflowMailNotifier workflowMailNotifier;
     private final WorkflowMonitoringRecorder workflowMonitoringRecorder;
     private final WorkflowStampRecorder workflowStampRecorder;
+    private final WorkflowAsyncProcessRecorder workflowAsyncProcessRecorder;
     private final TenantApplicationService tenantApplicationService;
 
     public WorkflowService(
@@ -42,12 +44,14 @@ public class WorkflowService {
             WorkflowMailNotifier workflowMailNotifier,
             WorkflowMonitoringRecorder workflowMonitoringRecorder,
             WorkflowStampRecorder workflowStampRecorder,
+            WorkflowAsyncProcessRecorder workflowAsyncProcessRecorder,
             @Lazy TenantApplicationService tenantApplicationService) {
         this.workflowRepository = workflowRepository;
         this.workflowAuthGuard = workflowAuthGuard;
         this.workflowMailNotifier = workflowMailNotifier;
         this.workflowMonitoringRecorder = workflowMonitoringRecorder;
         this.workflowStampRecorder = workflowStampRecorder;
+        this.workflowAsyncProcessRecorder = workflowAsyncProcessRecorder;
         this.tenantApplicationService = tenantApplicationService;
     }
 
@@ -197,6 +201,19 @@ public class WorkflowService {
                 instance.imSystemMatterId(),
                 imSessionId);
 
+        workflowAsyncProcessRecorder.recordCompletion(
+                definition,
+                instance.id(),
+                instance.entityType(),
+                instance.entityId(),
+                instance.title(),
+                action,
+                result.nextStatus(),
+                task.stepKey(),
+                principal.userId(),
+                instance.imSystemMatterId(),
+                imSessionId);
+
         if ("TENANT_APPLICATION".equals(instance.entityType())) {
             tenantApplicationService.handleWorkflowCompletion(instance.entityId(), result.nextStatus());
         }
@@ -255,6 +272,16 @@ public class WorkflowService {
                 imSessionId);
 
         workflowMonitoringRecorder.ensureFlowMonitoring(definition, imSessionId);
+
+        workflowAsyncProcessRecorder.recordSubmit(
+                definition,
+                updated.id(),
+                instance.entityType(),
+                instance.entityId(),
+                instance.title(),
+                TenantContext.requirePrincipal().userId(),
+                instance.imSystemMatterId(),
+                imSessionId);
 
         return updated;
     }

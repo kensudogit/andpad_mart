@@ -355,6 +355,17 @@ type Query {
   projectBudgetSummaries: [ProjectBudgetSummary!]!
   sentMailMessages(entityType: String, entityId: ID, limit: Int = 50): [SentMailMessage!]!
   monitoringFlowData(flowIds: [String!]): [MonitoringFlowData!]!
+  asyncProcessStatusData(
+    flowIds: [String!]
+    systemMatterIds: [String!]
+    limit: Int = 50
+  ): [AsyncProcessStatus!]!
+  cnfmActvMatters(flowIds: [String!], limit: Int = 50): [CnfmActvMatter!]!
+  lumpCnfmActvMatters(
+    flowIds: [String!]
+    noOrgzConditionFlag: Boolean = false
+    limit: Int = 50
+  ): [CnfmActvMatter!]!
   matterStamps(
     flowId: String
     entityType: String
@@ -925,6 +936,47 @@ type MonitoringFlowData {
   averageTime: String!
   amountTime: String!
   countSum: String
+}
+
+type AsyncProcessStatus {
+  id: ID!
+  acceptId: String!
+  asyncProcStatus: String!
+  authUserCode: String
+  executeUserCode: String
+  flowId: String!
+  matterName: String
+  matterNumber: String
+  message: String
+  nodeId: String
+  procComment: String
+  procDate: String
+  procType: String
+  queueId: String
+  subMessage: String
+  systemMatterId: String!
+  entityType: String
+  entityId: String
+  workflowInstanceId: String
+  updatedAt: String
+}
+
+type CnfmActvMatter {
+  id: ID!
+  listType: String!
+  systemMatterId: String!
+  flowId: String!
+  flowName: String
+  matterName: String
+  matterNumber: String
+  nodeId: String
+  applyAuthUserCode: String
+  applyAuthUserName: String
+  applyDate: String
+  arrivedDate: String
+  confirmCplFlag: String!
+  priorityLevel: String
+  updatedAt: String
 }
 
 type MatterStamp {

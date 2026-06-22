@@ -266,7 +266,107 @@ public class OrgSampleDataSeeder {
                 orgId,
                 recordId(orgId, "doc"));
         ensureMatterStampSamples(orgId);
+        ensureAsyncProcessSamples(orgId);
+        ensureCnfmActvMatterSamples(orgId);
         ensureSampleTenantApplication(orgId);
+    }
+
+    private void ensureAsyncProcessSamples(String orgId) {
+        if (!TenantContext.DEMO_ORG_ID.equals(orgId)) {
+            return;
+        }
+        String systemMatterId = stampSystemMatterId(orgId);
+        String wfInstanceId = stampWorkflowInstanceId(orgId);
+        String docRecordId = recordId(orgId, "doc");
+        jdbc.update(
+                """
+                INSERT INTO wf_async_process_status (
+                    id, org_id, accept_id, async_proc_status, auth_user_code, execute_user_code,
+                    flow_id, matter_name, matter_number, message, node_id, proc_comment, proc_date,
+                    proc_type, queue_id, sub_message, system_matter_id,
+                    entity_type, entity_id, workflow_instance_id, updated_at
+                )
+                VALUES (
+                    'async-doc-demo-1', ?, 'accept-doc-demo-1', '3', 'user_demo', 'user_demo',
+                    'document-approval', '安全書類提出', ?, '処理完了', 'final_approval', '承認済み',
+                    '2026/06/08 10:31:00', 'APPROVE', 'queue-doc-demo-1', NULL, ?,
+                    'DOCUMENT', ?, ?, NOW() - INTERVAL '29 minutes'
+                )
+                ON CONFLICT (org_id, accept_id) DO UPDATE SET
+                    async_proc_status = EXCLUDED.async_proc_status,
+                    message = EXCLUDED.message,
+                    updated_at = NOW()
+                """,
+                orgId,
+                systemMatterId,
+                systemMatterId,
+                docRecordId,
+                wfInstanceId);
+        jdbc.update(
+                """
+                INSERT INTO wf_async_process_status (
+                    id, org_id, accept_id, async_proc_status, auth_user_code, execute_user_code,
+                    flow_id, matter_name, matter_number, message, node_id, proc_comment, proc_date,
+                    proc_type, queue_id, sub_message, system_matter_id,
+                    entity_type, entity_id, workflow_instance_id, updated_at
+                )
+                VALUES (
+                    'async-doc-demo-2', ?, 'accept-doc-demo-2', '2', 'user_demo', 'user_demo',
+                    'document-approval', '図面承認申請', 'MAT-2026-042', '処理中', 'reviewer_approval', NULL,
+                    '2026/06/08 11:00:00', 'SUBMIT', 'queue-doc-demo-2', 'レビュー待ち', 'wf-doc-pending',
+                    'DOCUMENT', 'rec-doc-pending', 'wfi-doc-pending', NOW() - INTERVAL '10 minutes'
+                )
+                ON CONFLICT (org_id, accept_id) DO UPDATE SET
+                    async_proc_status = EXCLUDED.async_proc_status,
+                    message = EXCLUDED.message,
+                    updated_at = NOW()
+                """,
+                orgId);
+    }
+
+    private void ensureCnfmActvMatterSamples(String orgId) {
+        if (!TenantContext.DEMO_ORG_ID.equals(orgId)) {
+            return;
+        }
+        String systemMatterId = stampSystemMatterId(orgId);
+        jdbc.update(
+                """
+                INSERT INTO wf_cnfm_actv_matters (
+                    id, org_id, list_type, system_matter_id, flow_id, flow_name, matter_name, matter_number,
+                    node_id, apply_auth_user_code, apply_auth_user_name, apply_date, arrived_date,
+                    confirm_cpl_flag, priority_level, updated_at
+                )
+                VALUES (
+                    'cnfm-doc-demo-1', ?, 'CONFIRM', ?, 'document-approval', '資料承認フロー',
+                    '安全書類提出', ?, 'reviewer_approval', 'user_demo', '山田 太郎',
+                    '2026/06/08 09:00:00', '2026/06/08 09:30:00', '0', '1', NOW() - INTERVAL '45 minutes'
+                )
+                ON CONFLICT (org_id, list_type, system_matter_id) DO UPDATE SET
+                    matter_name = EXCLUDED.matter_name,
+                    confirm_cpl_flag = EXCLUDED.confirm_cpl_flag,
+                    updated_at = NOW()
+                """,
+                orgId,
+                systemMatterId,
+                systemMatterId);
+        jdbc.update(
+                """
+                INSERT INTO wf_cnfm_actv_matters (
+                    id, org_id, list_type, system_matter_id, flow_id, flow_name, matter_name, matter_number,
+                    node_id, apply_auth_user_code, apply_auth_user_name, apply_date, arrived_date,
+                    confirm_cpl_flag, priority_level, updated_at
+                )
+                VALUES (
+                    'cnfm-doc-demo-2', ?, 'LUMP_CONFIRM', 'wf-doc-pending', 'document-approval', '資料承認フロー',
+                    '図面承認申請', 'MAT-2026-042', 'reviewer_approval', 'user_demo', '佐藤 花子',
+                    '2026/06/08 10:00:00', '2026/06/08 10:15:00', '0', '2', NOW() - INTERVAL '20 minutes'
+                )
+                ON CONFLICT (org_id, list_type, system_matter_id) DO UPDATE SET
+                    matter_name = EXCLUDED.matter_name,
+                    confirm_cpl_flag = EXCLUDED.confirm_cpl_flag,
+                    updated_at = NOW()
+                """,
+                orgId);
     }
 
     private void ensureSampleTenantApplication(String orgId) {

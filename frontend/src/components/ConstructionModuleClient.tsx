@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { useEffect, useState } from 'react'
 import { DocumentApprovalWorkflowDiagram } from '@/components/DocumentApprovalWorkflowDiagram'
+import { DocApprovalAsyncProcessPanel } from '@/components/DocApprovalAsyncProcessPanel'
+import { DocApprovalCnfmActvPanel } from '@/components/DocApprovalCnfmActvPanel'
 import { DocApprovalMailPanel } from '@/components/DocApprovalMailPanel'
 import { DocApprovalMonitoringPanel } from '@/components/DocApprovalMonitoringPanel'
 import { DocApprovalStampPanel } from '@/components/DocApprovalStampPanel'
@@ -234,6 +236,8 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
       {slug === 'doc-approval' ? (
         <>
           <DocApprovalMonitoringPanel refreshKey={mailRefreshKey} />
+          <DocApprovalCnfmActvPanel refreshKey={mailRefreshKey} />
+          <DocApprovalAsyncProcessPanel refreshKey={mailRefreshKey} />
           <DocApprovalStampPanel refreshKey={mailRefreshKey} />
           <DocApprovalMailPanel refreshKey={mailRefreshKey} />
         </>
