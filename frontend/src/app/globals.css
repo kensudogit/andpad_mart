@@ -204,6 +204,41 @@ html, body {
   align-items: start;
 }
 
+.stat-grid--single-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.stat-grid--single-row .stat-card {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.4rem 0.45rem;
+  border-radius: 8px;
+}
+
+.stat-grid--single-row .stat-label {
+  font-size: 0.6rem;
+  line-height: 1.25;
+  display: block;
+}
+
+.stat-grid--single-row .stat-value {
+  font-size: 0.8125rem;
+  margin-top: 0.1rem;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.stat-grid--single-row .stat-card .muted.small {
+  font-size: 0.55rem;
+  line-height: 1.2;
+  margin-top: 0.08rem;
+  display: block;
+}
+
 .stat-card {
   background: var(--panel);
   border: 1px solid var(--border);

@@ -20,7 +20,11 @@ const statusLabels: Record<string, string> = {
 }
 
 function formatKpiValue(value: number, unit?: string | null) {
-  if (unit === '円') return `¥${value.toLocaleString()}`
+  if (unit === '円') {
+    if (Math.abs(value) >= 100_000_000) return `¥${(value / 100_000_000).toFixed(1)}億`
+    if (Math.abs(value) >= 10_000) return `¥${(value / 10_000).toFixed(0)}万`
+    return `¥${value.toLocaleString()}`
+  }
   if (unit) return `${value.toLocaleString()}${unit}`
   return value.toLocaleString()
 }
@@ -72,7 +76,7 @@ export function AIBoardClient() {
 
       {board ? (
         <>
-          <section className="stat-grid">
+          <section className="stat-grid stat-grid--single-row">
             {board.kpis.map((k) => (
               <div key={k.label} className="stat-card">
                 <div className="stat-label">{k.label}</div>

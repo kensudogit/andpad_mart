@@ -98,13 +98,13 @@ export function AnalyticsModuleClient() {
 
       {tab === 'overview' ? (
         <>
-          <section className="stat-grid">
+          <section className="stat-grid stat-grid--single-row">
             {dash.kpis.map((kpi) => (
               <div key={kpi.label} className="stat-card">
                 <span className="stat-label">{kpi.label}</span>
                 <span className="stat-value">
                   {kpi.unit === '円'
-                    ? `¥${kpi.value.toLocaleString()}`
+                    ? fmtYen(kpi.value)
                     : kpi.unit === '%'
                       ? `${kpi.value.toFixed(1)}%`
                       : `${kpi.value.toLocaleString()}${kpi.unit ?? ''}`}
