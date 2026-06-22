@@ -2195,6 +2195,11 @@ html, body {
   margin: 0;
 }
 
+.tenant-message-error {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
 .tenant-approval-row {
   display: flex;
   flex-direction: column;

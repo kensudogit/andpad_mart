@@ -19,7 +19,7 @@ import {
   UploadTenantApplicationDocumentDocument,
   WorkflowAction,
 } from '@/lib/generated/graphql'
-import { isAuthRequiredGraphQLError, isNetworkGraphQLError } from '@/lib/graphql-errors'
+import { isAuthRequiredGraphQLError, isNetworkGraphQLError, graphQLErrorHint } from '@/lib/graphql-errors'
 import { ui } from '@/lib/ui'
 
 const STEPS = [
@@ -104,6 +104,7 @@ export function TenantManagementClient() {
   const [docContent, setDocContent] = useState('')
   const [approvalComment, setApprovalComment] = useState('')
   const [message, setMessage] = useState<string | null>(null)
+  const [messageIsError, setMessageIsError] = useState(false)
 
   const { data: sessionData, loading: sessionLoading } = useQuery(CurrentSessionDocument, {
     fetchPolicy: 'network-only',
@@ -177,6 +178,17 @@ export function TenantManagementClient() {
     }
   }, [editId, currentApp, wizardOpen])
 
+  function showSuccess(text: string) {
+    setMessage(text)
+    setMessageIsError(false)
+  }
+
+  function showError(err: unknown) {
+    const raw = err instanceof Error ? err.message : ui.saveFailed
+    setMessage(graphQLErrorHint(raw))
+    setMessageIsError(true)
+  }
+
   async function saveDraft() {
     setMessage(null)
     const input = {
@@ -202,10 +214,10 @@ export function TenantManagementClient() {
         }
       }
       await refetchList()
-      setMessage('下書きを保存しました')
+      showSuccess('下書きを保存しました')
       setStep(4)
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : ui.saveFailed)
+      showError(err)
     }
   }
 
@@ -227,9 +239,9 @@ export function TenantManagementClient() {
       setDocContent('')
       await refetchDetail()
       await refetchList()
-      setMessage('書類を追加しました')
+      showSuccess('書類を追加しました')
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : ui.saveFailed)
+      showError(err)
     }
   }
 
@@ -242,9 +254,9 @@ export function TenantManagementClient() {
       await refetchDetail()
       await refetchApproval()
       setStep(5)
-      setMessage('承認申請を送信しました')
+      showSuccess('承認申請を送信しました')
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : ui.saveFailed)
+      showError(err)
     }
   }
 
@@ -263,9 +275,9 @@ export function TenantManagementClient() {
       setApprovalComment('')
       await refetchList()
       await refetchApproval()
-      setMessage(action === WorkflowAction.Approve ? '承認しました' : '却下しました')
+      showSuccess(action === WorkflowAction.Approve ? '承認しました' : '却下しました')
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : ui.saveFailed)
+      showError(err)
     }
   }
 
@@ -408,7 +420,11 @@ export function TenantManagementClient() {
             ))}
           </nav>
 
-          {message ? <p className="tenant-message">{message}</p> : null}
+          {message ? (
+            <p className={messageIsError ? 'tenant-message tenant-message-error' : 'tenant-message'}>
+              {message}
+            </p>
+          ) : null}
 
           {step === 0 ? (
             <section>

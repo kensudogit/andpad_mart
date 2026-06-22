@@ -11,6 +11,7 @@ import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;
 import jp.andpad.imart.workflow.WorkflowException;
 import jp.andpad.api.security.UnauthorizedException;
+import org.springframework.dao.DataAccessException;
 import reactor.core.publisher.Mono;
 
 /** GraphQL データフェッチャー例外をクライアント向けエラー種別へ変換する。 */
@@ -40,6 +41,32 @@ public class GraphQlExceptionResolver implements DataFetcherExceptionResolver {
                             .message(badRequest.getMessage())
                             .build()));
         }
+        if (ex instanceof IllegalStateException state) {
+            return Mono.just(List.of(
+                    GraphqlErrorBuilder.newError(env)
+                            .errorType(ErrorType.BAD_REQUEST)
+                            .message(state.getMessage())
+                            .build()));
+        }
+        if (ex instanceof DataAccessException dataAccess) {
+            return Mono.just(List.of(
+                    GraphqlErrorBuilder.newError(env)
+                            .errorType(ErrorType.BAD_REQUEST)
+                            .message(sanitizeDataAccessMessage(dataAccess))
+                            .build()));
+        }
         return Mono.empty();
+    }
+
+    private static String sanitizeDataAccessMessage(DataAccessException ex) {
+        Throwable root = ex.getMostSpecificCause();
+        String message = root != null ? root.getMessage() : ex.getMessage();
+        if (message == null || message.isBlank()) {
+            return "database error";
+        }
+        if (message.contains("tenant_applications") && message.contains("does not exist")) {
+            return "tenant_applications table is missing; apply database migration V015";
+        }
+        return message;
     }
 }

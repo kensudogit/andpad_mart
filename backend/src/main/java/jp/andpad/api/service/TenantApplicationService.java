@@ -3,6 +3,7 @@ package jp.andpad.api.service;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -227,10 +228,17 @@ public class TenantApplicationService {
     }
 
     private static String normalizeSlug(String slug, String name) {
+        String candidate;
         if (slug != null && !slug.isBlank()) {
-            return slug.toLowerCase(Locale.ROOT).trim().replaceAll("[^a-z0-9-]", "-");
+            candidate = slug.toLowerCase(Locale.ROOT).trim().replaceAll("[^a-z0-9-]", "-");
+        } else {
+            candidate = name.toLowerCase(Locale.ROOT).trim().replaceAll("[^a-z0-9]+", "-");
         }
-        return name.toLowerCase(Locale.ROOT).trim().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+        candidate = candidate.replaceAll("-+", "-").replaceAll("^-|-$", "");
+        if (candidate.isBlank()) {
+            candidate = "tenant-" + UUID.randomUUID().toString().substring(0, 8);
+        }
+        return candidate;
     }
 
     private static String trimToNull(String value) {

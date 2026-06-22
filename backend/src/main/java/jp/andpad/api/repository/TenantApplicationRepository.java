@@ -158,19 +158,33 @@ public class TenantApplicationRepository {
 
     public boolean slugTaken(String slug, String excludeId) {
         String normalized = slug.toLowerCase(Locale.ROOT).trim();
+        if (excludeId == null || excludeId.isBlank()) {
+            Boolean taken = jdbc.queryForObject(
+                    """
+                    SELECT EXISTS(
+                        SELECT 1 FROM organizations WHERE LOWER(slug) = ?
+                        UNION ALL
+                        SELECT 1 FROM tenant_applications
+                        WHERE LOWER(slug) = ? AND status NOT IN ('REJECTED')
+                    )
+                    """,
+                    Boolean.class,
+                    normalized,
+                    normalized);
+            return Boolean.TRUE.equals(taken);
+        }
         Boolean taken = jdbc.queryForObject(
                 """
                 SELECT EXISTS(
                     SELECT 1 FROM organizations WHERE LOWER(slug) = ?
                     UNION ALL
                     SELECT 1 FROM tenant_applications
-                    WHERE LOWER(slug) = ? AND status NOT IN ('REJECTED') AND (? IS NULL OR id <> ?)
+                    WHERE LOWER(slug) = ? AND status NOT IN ('REJECTED') AND id <> ?
                 )
                 """,
                 Boolean.class,
                 normalized,
                 normalized,
-                excludeId,
                 excludeId);
         return Boolean.TRUE.equals(taken);
     }
