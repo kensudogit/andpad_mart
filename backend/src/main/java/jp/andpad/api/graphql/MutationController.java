@@ -45,6 +45,11 @@ import jp.andpad.api.graphql.input.LearningInputs.CreateRagDocumentInput;
 import jp.andpad.api.graphql.input.LearningInputs.CreateVideoNoteInput;
 import jp.andpad.api.graphql.input.LearningInputs.SubmitQuizAttemptInput;
 import jp.andpad.api.graphql.input.LearningInputs.UpdateWatchProgressInput;
+import jp.andpad.api.domain.TenantApplication;
+import jp.andpad.api.domain.TenantApplicationDocument;
+import jp.andpad.api.graphql.input.CreateTenantApplicationInput;
+import jp.andpad.api.graphql.input.UpdateTenantApplicationInput;
+import jp.andpad.api.graphql.input.UploadTenantApplicationDocumentInput;
 import jp.andpad.api.graphql.input.UpdateOrganizationInput;
 import jp.andpad.api.graphql.input.CompleteWorkflowTaskInput;
 import jp.andpad.api.graphql.input.StartWorkflowInput;
@@ -56,6 +61,7 @@ import jp.andpad.api.service.ExtendedService;
 import jp.andpad.api.service.LearningStubService;
 import jp.andpad.api.service.OrganizationService;
 import jp.andpad.api.service.SaasService;
+import jp.andpad.api.service.TenantApplicationService;
 import jp.andpad.api.service.WorkflowService;
 import jp.andpad.api.util.Dates;
 import jp.andpad.imart.workflow.model.WorkflowAction;
@@ -73,6 +79,7 @@ public class MutationController {
     private final ExtendedService extendedService;
     private final ConsultService consultService;
     private final WorkflowService workflowService;
+    private final TenantApplicationService tenantApplicationService;
 
     @MutationMapping
     public Organization updateOrganization(@Argument UpdateOrganizationInput input) {
@@ -259,5 +266,26 @@ public class MutationController {
                 WorkflowAction.valueOf(input.action()),
                 input.comment(),
                 input.imSessionId());
+    }
+
+    @MutationMapping
+    public TenantApplication createTenantApplication(@Argument CreateTenantApplicationInput input) {
+        return tenantApplicationService.createApplication(input);
+    }
+
+    @MutationMapping
+    public TenantApplication updateTenantApplication(@Argument UpdateTenantApplicationInput input) {
+        return tenantApplicationService.updateApplication(input);
+    }
+
+    @MutationMapping
+    public TenantApplicationDocument uploadTenantApplicationDocument(
+            @Argument UploadTenantApplicationDocumentInput input) {
+        return tenantApplicationService.uploadDocument(input);
+    }
+
+    @MutationMapping
+    public TenantApplication submitTenantApplication(@Argument String id, @Argument String imSessionId) {
+        return tenantApplicationService.submitApplication(id, imSessionId);
     }
 }

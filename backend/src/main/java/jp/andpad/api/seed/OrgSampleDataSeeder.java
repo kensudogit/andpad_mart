@@ -265,6 +265,39 @@ public class OrgSampleDataSeeder {
                 """,
                 orgId,
                 recordId(orgId, "doc"));
+        ensureMatterStampSamples(orgId);
+        ensureSampleTenantApplication(orgId);
+    }
+
+    private void ensureSampleTenantApplication(String orgId) {
+        if (!TenantContext.DEMO_ORG_ID.equals(orgId)) {
+            return;
+        }
+        jdbc.update(
+                """
+                INSERT INTO tenant_applications (
+                    id, applicant_org_id, applicant_user_id, name, slug, address,
+                    contact_name, contact_email, contact_phone, owner_name, owner_email, notes, status
+                )
+                VALUES (
+                    'tapp-demo-draft', ?, 'user_demo', '北関東建設株式会社', 'kitakanto-kensetsu',
+                    '茨城県つくば市研究学園1-1-1', '鈴木 一郎', 'contact@kitakanto.example', '029-123-4567',
+                    '鈴木 一郎', 'owner@kitakanto.example', 'デモ用テナント申請（下書き）', 'DRAFT'
+                )
+                ON CONFLICT (id) DO UPDATE SET
+                    name = EXCLUDED.name,
+                    updated_at = NOW()
+                """,
+                orgId);
+        jdbc.update(
+                """
+                INSERT INTO tenant_application_documents (id, application_id, file_name, content_type, content_text)
+                VALUES (
+                    'tdoc-demo-1', 'tapp-demo-draft', '登記簿謄本.pdf', 'application/pdf',
+                    'デモ用書類 — 北関東建設株式会社 登記簿謄本（サンプル）'
+                )
+                ON CONFLICT (id) DO NOTHING
+                """);
     }
 
     private void ensureMatterStampSamples(String orgId) {

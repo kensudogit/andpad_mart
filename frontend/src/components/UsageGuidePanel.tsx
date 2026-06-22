@@ -285,6 +285,24 @@ const L = {
         '  スタブ時は dev-imart-session ヘッダで REST / GraphQL 動作確認可',
       ],
     },
+    {
+      title: '13. テナント管理（新規テナント作成）',
+      body:
+        'プラットフォームにログイン後、/tenants から新規テナントの申請・書類登録・承認申請まで6ステップで進められます。承認完了後に organizations が作成されます。',
+      items: [
+        '【画面】/tenants — サイドバー「テナント管理」',
+        '【手順】1. ログイン → 2. テナント管理 → 3. 基本情報入力 → 4. 下書き保存',
+        '  5. 関連書類追加 → 6. 承認申請（tenant-provisioning WF 起票）',
+        '【デモ】demo@sakura-dental.jp ログイン · 下書きサンプル tapp-demo-draft',
+        '【GraphQL Query】tenantApplications · tenantApplication(id) · isPlatformTenantAdmin',
+        '【GraphQL Mutation】createTenantApplication · updateTenantApplication',
+        '  uploadTenantApplicationDocument · submitTenantApplication',
+        '【承認】プラットフォーム管理者（org_demo OWNER）が myWorkflowTasks → completeWorkflowTask',
+        '  flowId — tenant-provisioning · entityType — TENANT_APPLICATION',
+        '  承認完了時 — AuthRepository.createOrganizationFromTenant + OrgSampleDataSeeder',
+        '【DB】tenant_applications · tenant_application_documents（V015）',
+      ],
+    },
   ] satisfies readonly GuideStep[],
 } as const
 

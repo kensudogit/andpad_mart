@@ -14,6 +14,7 @@ const nav = [
   { href: '/', label: ui.navHome, short: ui.navHome },
   { href: '/projects', label: ui.navProjects, short: ui.navProjects },
   { href: '/saas', label: ui.navSaas, short: 'SaaS' },
+  { href: '/tenants', label: ui.navTenants, short: ui.navTenantsShort },
   { href: '/saas/analytics', label: ui.navAnalytics, short: 'Analytics' },
   { href: '/board', label: ui.navBoard, short: ui.navBoard },
   { href: '/settings', label: ui.navSettings, short: ui.navSettings },

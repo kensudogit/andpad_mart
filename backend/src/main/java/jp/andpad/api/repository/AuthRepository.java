@@ -141,6 +141,68 @@ public class AuthRepository {
         return new LoginResult(user, org, MemberRole.OWNER);
     }
 
+    /**
+     * テナント申請承認時に新規組織とオーナーユーザを作成する。
+     *
+     * @return 作成した組織 ID
+     */
+    @Transactional
+    public String createOrganizationFromTenant(
+            String name,
+            String slug,
+            String address,
+            String contactName,
+            String contactEmail,
+            String contactPhone,
+            String ownerName,
+            String ownerEmail) {
+        String normalizedSlug = slug.toLowerCase(Locale.ROOT).trim();
+        String email = ownerEmail.toLowerCase(Locale.ROOT).trim();
+        String orgId = Ids.random("org_");
+        jdbc.update(
+                """
+                INSERT INTO organizations (
+                    id, name, slug, plan_tier, subscription_status, seat_count, timezone,
+                    address, contact_name, contact_email, contact_phone
+                ) VALUES (?, ?, ?, 'STARTER', 'TRIALING', 5, 'Asia/Tokyo', ?, ?, ?, ?)
+                """,
+                orgId,
+                name,
+                normalizedSlug,
+                address,
+                contactName,
+                contactEmail,
+                contactPhone);
+        jdbc.update("INSERT INTO usage_counters (org_id) VALUES (?)", orgId);
+        jdbc.update(
+                """
+                INSERT INTO org_modules (org_id, module_code, enabled)
+                SELECT ?, code, TRUE FROM saas_modules
+                """,
+                orgId);
+
+        Optional<User> existing = findUserByEmail(email);
+        String userId;
+        if (existing.isPresent()) {
+            userId = existing.get().id();
+        } else {
+            userId = Ids.random("user_");
+            String hash = passwordEncoder.encode("Tenant" + orgId.substring(Math.max(0, orgId.length() - 6)) + "!");
+            jdbc.update(
+                    "INSERT INTO users (id, email, name, password_hash) VALUES (?, ?, ?, ?)",
+                    userId,
+                    email,
+                    ownerName,
+                    hash);
+        }
+        jdbc.update(
+                "INSERT INTO team_members (id, org_id, user_id, role) VALUES (?, ?, ?, 'OWNER')",
+                Ids.random("tm_"),
+                orgId,
+                userId);
+        return orgId;
+    }
+
     public Optional<LoginResult> sessionByUser(String userId, String orgId) {
         try {
             User user = jdbc.queryForObject(

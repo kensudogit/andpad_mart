@@ -24,10 +24,9 @@ import jp.andpad.imart.workflow.spi.WorkflowAuthGuard;
 import jp.andpad.imart.mail.WorkflowMailNotifier;
 import jp.andpad.imart.monitoring.WorkflowMonitoringRecorder;
 import jp.andpad.imart.stamp.WorkflowStampRecorder;
-import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 
 @Service
-@RequiredArgsConstructor
 public class WorkflowService {
 
     private final WorkflowRepository workflowRepository;
@@ -35,6 +34,22 @@ public class WorkflowService {
     private final WorkflowMailNotifier workflowMailNotifier;
     private final WorkflowMonitoringRecorder workflowMonitoringRecorder;
     private final WorkflowStampRecorder workflowStampRecorder;
+    private final TenantApplicationService tenantApplicationService;
+
+    public WorkflowService(
+            WorkflowRepository workflowRepository,
+            WorkflowAuthGuard workflowAuthGuard,
+            WorkflowMailNotifier workflowMailNotifier,
+            WorkflowMonitoringRecorder workflowMonitoringRecorder,
+            WorkflowStampRecorder workflowStampRecorder,
+            @Lazy TenantApplicationService tenantApplicationService) {
+        this.workflowRepository = workflowRepository;
+        this.workflowAuthGuard = workflowAuthGuard;
+        this.workflowMailNotifier = workflowMailNotifier;
+        this.workflowMonitoringRecorder = workflowMonitoringRecorder;
+        this.workflowStampRecorder = workflowStampRecorder;
+        this.tenantApplicationService = tenantApplicationService;
+    }
 
     public List<WorkflowDefinitionView> listDefinitions() {
         return workflowRepository.listDefinitions(TenantContext.orgId());
@@ -181,6 +196,10 @@ public class WorkflowService {
                 principal.name(),
                 instance.imSystemMatterId(),
                 imSessionId);
+
+        if ("TENANT_APPLICATION".equals(instance.entityType())) {
+            tenantApplicationService.handleWorkflowCompletion(instance.entityId(), result.nextStatus());
+        }
 
         return updated;
     }

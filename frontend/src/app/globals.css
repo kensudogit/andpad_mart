@@ -2139,6 +2139,85 @@ html, body {
   }
 }
 
+.tenant-wizard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tenant-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
+.tenant-step {
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-2, #f1f5f9);
+  color: var(--muted, #64748b);
+}
+
+.tenant-step.active {
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+}
+
+.tenant-step.done {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.tenant-summary {
+  display: grid;
+  grid-template-columns: minmax(8rem, auto) 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0 0 1rem;
+}
+
+.tenant-summary dt {
+  font-weight: 600;
+  color: var(--muted, #64748b);
+}
+
+.tenant-summary dd {
+  margin: 0;
+}
+
+.tenant-message {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  background: #ecfdf5;
+  color: #065f46;
+  margin: 0;
+}
+
+.tenant-approval-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.tenant-approval-comment input {
+  width: 100%;
+  min-width: 12rem;
+}
+
+.tenant-approval-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+}
+
 .saas-actions {
   display: flex;
   gap: 0.5rem;

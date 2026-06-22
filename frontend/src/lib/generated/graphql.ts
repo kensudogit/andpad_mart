@@ -202,6 +202,13 @@ export type Certificate = {
   title: Scalars['String']['output'];
 };
 
+export type CompleteWorkflowTaskInput = {
+  action: WorkflowAction;
+  comment?: InputMaybe<Scalars['String']['input']>;
+  imSessionId?: InputMaybe<Scalars['String']['input']>;
+  taskId: Scalars['ID']['input'];
+};
+
 export type ConstructionProject = {
   __typename?: 'ConstructionProject';
   createdAt: Scalars['String']['output'];
@@ -400,6 +407,18 @@ export type CreateRagDocumentInput = {
   title: Scalars['String']['input'];
 };
 
+export type CreateTenantApplicationInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
+  contactEmail: Scalars['String']['input'];
+  contactName: Scalars['String']['input'];
+  contactPhone?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  notes?: InputMaybe<Scalars['String']['input']>;
+  ownerEmail: Scalars['String']['input'];
+  ownerName: Scalars['String']['input'];
+  slug?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type CreateVideoNoteInput = {
   body: Scalars['String']['input'];
   learnerId: Scalars['ID']['input'];
@@ -579,6 +598,7 @@ export type Mutation = {
   approveProjectBudget: ProjectBudget;
   clockIn: AttendanceRecord;
   clockOut: AttendanceRecord;
+  completeWorkflowTask: WorkflowInstance;
   createApiIntegration: ApiIntegration;
   createBimModel: BimModel;
   createBudgetLineItem: BudgetLineItem;
@@ -594,6 +614,7 @@ export type Mutation = {
   createProjectBudget: ProjectBudget;
   createProjectModuleRecord: ProjectModuleRecord;
   createRagDocument: RagDocument;
+  createTenantApplication: TenantApplication;
   createVideoNote: VideoNote;
   deleteVideoNote: Scalars['Boolean']['output'];
   enrollLearningPath: LearningPath;
@@ -603,10 +624,13 @@ export type Mutation = {
   setSaasModuleEnabled: SaasModule;
   signContract: Contract;
   submitQuizAttempt: QuizAttempt;
+  submitTenantApplication: TenantApplication;
   syncApiIntegration: ApiIntegration;
   toggleBookmark: Maybe<Bookmark>;
   updateOrganization: Organization;
+  updateTenantApplication: TenantApplication;
   updateWatchProgress: WatchProgress;
+  uploadTenantApplicationDocument: TenantApplicationDocument;
 };
 
 
@@ -622,6 +646,11 @@ export type MutationApproveProjectBudgetArgs = {
 
 export type MutationClockInArgs = {
   note?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationCompleteWorkflowTaskArgs = {
+  input: CompleteWorkflowTaskInput;
 };
 
 
@@ -704,6 +733,11 @@ export type MutationCreateRagDocumentArgs = {
 };
 
 
+export type MutationCreateTenantApplicationArgs = {
+  input: CreateTenantApplicationInput;
+};
+
+
 export type MutationCreateVideoNoteArgs = {
   input: CreateVideoNoteInput;
 };
@@ -752,6 +786,12 @@ export type MutationSubmitQuizAttemptArgs = {
 };
 
 
+export type MutationSubmitTenantApplicationArgs = {
+  id: Scalars['ID']['input'];
+  imSessionId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type MutationSyncApiIntegrationArgs = {
   id: Scalars['ID']['input'];
 };
@@ -768,8 +808,18 @@ export type MutationUpdateOrganizationArgs = {
 };
 
 
+export type MutationUpdateTenantApplicationArgs = {
+  input: UpdateTenantApplicationInput;
+};
+
+
 export type MutationUpdateWatchProgressArgs = {
   input: UpdateWatchProgressInput;
+};
+
+
+export type MutationUploadTenantApplicationDocumentArgs = {
+  input: UploadTenantApplicationDocumentInput;
 };
 
 export type Organization = {
@@ -878,6 +928,7 @@ export type Query = {
   health: Health;
   instructor: Maybe<Instructor>;
   instructors: Array<Instructor>;
+  isPlatformTenantAdmin: Scalars['Boolean']['output'];
   learningPath: Maybe<LearningPath>;
   learningPaths: Array<LearningPath>;
   leaveRequests: Array<LeaveRequest>;
@@ -887,6 +938,7 @@ export type Query = {
   myCertificates: Array<Certificate>;
   myProgress: Array<WatchProgress>;
   myQuizAttempts: Array<QuizAttempt>;
+  myWorkflowTasks: Array<WorkflowTask>;
   organization: Organization;
   projectBudgetSummaries: Array<ProjectBudgetSummary>;
   projectBudgets: Array<ProjectBudget>;
@@ -899,6 +951,8 @@ export type Query = {
   saasModules: Array<SaasModule>;
   sentMailMessages: Array<SentMailMessage>;
   teamMembers: Array<TeamMember>;
+  tenantApplication: Maybe<TenantApplication>;
+  tenantApplications: Array<TenantApplication>;
   usageSummary: UsageSummary;
   video: Maybe<Video>;
   videoNotes: Array<VideoNote>;
@@ -1039,6 +1093,11 @@ export type QuerySentMailMessagesArgs = {
   entityId?: InputMaybe<Scalars['ID']['input']>;
   entityType?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryTenantApplicationArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1224,6 +1283,48 @@ export type TeamMember = {
   user: User;
 };
 
+export type TenantApplication = {
+  __typename?: 'TenantApplication';
+  address: Maybe<Scalars['String']['output']>;
+  applicantOrgId: Scalars['ID']['output'];
+  applicantUserId: Scalars['ID']['output'];
+  approvedAt: Maybe<Scalars['String']['output']>;
+  contactEmail: Scalars['String']['output'];
+  contactName: Scalars['String']['output'];
+  contactPhone: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  createdOrgId: Maybe<Scalars['ID']['output']>;
+  documents: Array<TenantApplicationDocument>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  notes: Maybe<Scalars['String']['output']>;
+  ownerEmail: Scalars['String']['output'];
+  ownerName: Scalars['String']['output'];
+  slug: Scalars['String']['output'];
+  status: TenantApplicationStatus;
+  submittedAt: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['String']['output'];
+  workflowInstanceId: Maybe<Scalars['ID']['output']>;
+};
+
+export type TenantApplicationDocument = {
+  __typename?: 'TenantApplicationDocument';
+  applicationId: Scalars['ID']['output'];
+  contentType: Maybe<Scalars['String']['output']>;
+  fileName: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  uploadedAt: Scalars['String']['output'];
+};
+
+export enum TenantApplicationStatus {
+  Active = 'ACTIVE',
+  Approved = 'APPROVED',
+  Draft = 'DRAFT',
+  PendingApproval = 'PENDING_APPROVAL',
+  Rejected = 'REJECTED',
+  Submitted = 'SUBMITTED'
+}
+
 export type UpdateOrganizationInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   seatCount?: InputMaybe<Scalars['Int']['input']>;
@@ -1231,11 +1332,31 @@ export type UpdateOrganizationInput = {
   timezone?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdateTenantApplicationInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
+  contactEmail?: InputMaybe<Scalars['String']['input']>;
+  contactName?: InputMaybe<Scalars['String']['input']>;
+  contactPhone?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
+  ownerEmail?: InputMaybe<Scalars['String']['input']>;
+  ownerName?: InputMaybe<Scalars['String']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type UpdateWatchProgressInput = {
   completed?: InputMaybe<Scalars['Boolean']['input']>;
   learnerId: Scalars['ID']['input'];
   positionSec: Scalars['Int']['input'];
   videoId: Scalars['ID']['input'];
+};
+
+export type UploadTenantApplicationDocumentInput = {
+  applicationId: Scalars['ID']['input'];
+  contentText?: InputMaybe<Scalars['String']['input']>;
+  contentType?: InputMaybe<Scalars['String']['input']>;
+  fileName: Scalars['String']['input'];
 };
 
 export type UsageSummary = {
@@ -1321,6 +1442,45 @@ export type WatchProgress = {
   positionSec: Scalars['Int']['output'];
   updatedAt: Scalars['String']['output'];
   videoId: Scalars['ID']['output'];
+};
+
+export enum WorkflowAction {
+  Approve = 'APPROVE',
+  Cancel = 'CANCEL',
+  Reject = 'REJECT',
+  Return = 'RETURN',
+  Submit = 'SUBMIT'
+}
+
+export type WorkflowInstance = {
+  __typename?: 'WorkflowInstance';
+  completedAt: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  currentStepKey: Maybe<Scalars['String']['output']>;
+  entityId: Scalars['String']['output'];
+  entityType: Scalars['String']['output'];
+  flowId: Scalars['String']['output'];
+  flowName: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  status: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
+export type WorkflowTask = {
+  __typename?: 'WorkflowTask';
+  actedByUserId: Maybe<Scalars['String']['output']>;
+  actionTaken: Maybe<Scalars['String']['output']>;
+  assigneeType: Scalars['String']['output'];
+  assigneeValue: Maybe<Scalars['String']['output']>;
+  comment: Maybe<Scalars['String']['output']>;
+  completedAt: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  instanceId: Scalars['ID']['output'];
+  status: Scalars['String']['output'];
+  stepKey: Scalars['String']['output'];
+  stepName: Maybe<Scalars['String']['output']>;
 };
 
 export type BoardAnalyticsPageQueryVariables = Exact<{
@@ -1819,6 +1979,64 @@ export type LearningActivitySubscriptionVariables = Exact<{
 
 export type LearningActivitySubscription = { __typename?: 'Subscription', learningActivity: { __typename?: 'LearningActivityEvent', kind: LearningActivityKind, learnerId: string, videoId: string | null, pathId: string | null, quizId: string | null, message: string, occurredAt: string } };
 
+export type TenantApplicationDocumentFieldsFragment = { __typename?: 'TenantApplicationDocument', id: string, applicationId: string, fileName: string, contentType: string | null, uploadedAt: string };
+
+export type TenantApplicationFieldsFragment = { __typename?: 'TenantApplication', id: string, applicantOrgId: string, applicantUserId: string, name: string, slug: string, address: string | null, contactName: string, contactEmail: string, contactPhone: string | null, ownerName: string, ownerEmail: string, notes: string | null, status: TenantApplicationStatus, workflowInstanceId: string | null, createdOrgId: string | null, submittedAt: string | null, approvedAt: string | null, createdAt: string, updatedAt: string, documents: Array<{ __typename?: 'TenantApplicationDocument', id: string, applicationId: string, fileName: string, contentType: string | null, uploadedAt: string }> };
+
+export type WorkflowTaskFieldsFragment = { __typename?: 'WorkflowTask', id: string, instanceId: string, stepKey: string, stepName: string | null, assigneeType: string, assigneeValue: string | null, status: string, createdAt: string };
+
+export type TenantApplicationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TenantApplicationsQuery = { __typename?: 'Query', isPlatformTenantAdmin: boolean, tenantApplications: Array<{ __typename?: 'TenantApplication', id: string, applicantOrgId: string, applicantUserId: string, name: string, slug: string, address: string | null, contactName: string, contactEmail: string, contactPhone: string | null, ownerName: string, ownerEmail: string, notes: string | null, status: TenantApplicationStatus, workflowInstanceId: string | null, createdOrgId: string | null, submittedAt: string | null, approvedAt: string | null, createdAt: string, updatedAt: string, documents: Array<{ __typename?: 'TenantApplicationDocument', id: string, applicationId: string, fileName: string, contentType: string | null, uploadedAt: string }> }> };
+
+export type TenantApplicationDetailQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type TenantApplicationDetailQuery = { __typename?: 'Query', isPlatformTenantAdmin: boolean, tenantApplication: { __typename?: 'TenantApplication', id: string, applicantOrgId: string, applicantUserId: string, name: string, slug: string, address: string | null, contactName: string, contactEmail: string, contactPhone: string | null, ownerName: string, ownerEmail: string, notes: string | null, status: TenantApplicationStatus, workflowInstanceId: string | null, createdOrgId: string | null, submittedAt: string | null, approvedAt: string | null, createdAt: string, updatedAt: string, documents: Array<{ __typename?: 'TenantApplicationDocument', id: string, applicationId: string, fileName: string, contentType: string | null, uploadedAt: string }> } | null };
+
+export type TenantApprovalTasksQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TenantApprovalTasksQuery = { __typename?: 'Query', isPlatformTenantAdmin: boolean, myWorkflowTasks: Array<{ __typename?: 'WorkflowTask', id: string, instanceId: string, stepKey: string, stepName: string | null, assigneeType: string, assigneeValue: string | null, status: string, createdAt: string }> };
+
+export type CreateTenantApplicationMutationVariables = Exact<{
+  input: CreateTenantApplicationInput;
+}>;
+
+
+export type CreateTenantApplicationMutation = { __typename?: 'Mutation', createTenantApplication: { __typename?: 'TenantApplication', id: string, applicantOrgId: string, applicantUserId: string, name: string, slug: string, address: string | null, contactName: string, contactEmail: string, contactPhone: string | null, ownerName: string, ownerEmail: string, notes: string | null, status: TenantApplicationStatus, workflowInstanceId: string | null, createdOrgId: string | null, submittedAt: string | null, approvedAt: string | null, createdAt: string, updatedAt: string, documents: Array<{ __typename?: 'TenantApplicationDocument', id: string, applicationId: string, fileName: string, contentType: string | null, uploadedAt: string }> } };
+
+export type UpdateTenantApplicationMutationVariables = Exact<{
+  input: UpdateTenantApplicationInput;
+}>;
+
+
+export type UpdateTenantApplicationMutation = { __typename?: 'Mutation', updateTenantApplication: { __typename?: 'TenantApplication', id: string, applicantOrgId: string, applicantUserId: string, name: string, slug: string, address: string | null, contactName: string, contactEmail: string, contactPhone: string | null, ownerName: string, ownerEmail: string, notes: string | null, status: TenantApplicationStatus, workflowInstanceId: string | null, createdOrgId: string | null, submittedAt: string | null, approvedAt: string | null, createdAt: string, updatedAt: string, documents: Array<{ __typename?: 'TenantApplicationDocument', id: string, applicationId: string, fileName: string, contentType: string | null, uploadedAt: string }> } };
+
+export type UploadTenantApplicationDocumentMutationVariables = Exact<{
+  input: UploadTenantApplicationDocumentInput;
+}>;
+
+
+export type UploadTenantApplicationDocumentMutation = { __typename?: 'Mutation', uploadTenantApplicationDocument: { __typename?: 'TenantApplicationDocument', id: string, applicationId: string, fileName: string, contentType: string | null, uploadedAt: string } };
+
+export type SubmitTenantApplicationMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SubmitTenantApplicationMutation = { __typename?: 'Mutation', submitTenantApplication: { __typename?: 'TenantApplication', id: string, applicantOrgId: string, applicantUserId: string, name: string, slug: string, address: string | null, contactName: string, contactEmail: string, contactPhone: string | null, ownerName: string, ownerEmail: string, notes: string | null, status: TenantApplicationStatus, workflowInstanceId: string | null, createdOrgId: string | null, submittedAt: string | null, approvedAt: string | null, createdAt: string, updatedAt: string, documents: Array<{ __typename?: 'TenantApplicationDocument', id: string, applicationId: string, fileName: string, contentType: string | null, uploadedAt: string }> } };
+
+export type CompleteTenantApprovalTaskMutationVariables = Exact<{
+  input: CompleteWorkflowTaskInput;
+}>;
+
+
+export type CompleteTenantApprovalTaskMutation = { __typename?: 'Mutation', completeWorkflowTask: { __typename?: 'WorkflowInstance', id: string, flowId: string, entityType: string, entityId: string, status: string, completedAt: string | null } };
+
 export type VideosPageQueryVariables = Exact<{
   category?: InputMaybe<VideoCategory>;
   skillLevel?: InputMaybe<SkillLevel>;
@@ -1862,6 +2080,9 @@ export const ConsultThreadFieldsFragmentDoc = {"kind":"Document","definitions":[
 export const RagDocumentFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RagDocumentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RagDocument"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"tags"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]} as unknown as DocumentNode<RagDocumentFieldsFragment, unknown>;
 export const RagSearchHitFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RagSearchHitFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RagSearchHit"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"documentId"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"snippet"}},{"kind":"Field","name":{"kind":"Name","value":"score"}}]}}]} as unknown as DocumentNode<RagSearchHitFieldsFragment, unknown>;
 export const MatterStampFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MatterStampFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MatterStamp"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"systemMatterId"}},{"kind":"Field","name":{"kind":"Name","value":"no"}},{"kind":"Field","name":{"kind":"Name","value":"nodeId"}},{"kind":"Field","name":{"kind":"Name","value":"processDate"}},{"kind":"Field","name":{"kind":"Name","value":"processId"}},{"kind":"Field","name":{"kind":"Name","value":"stampStr1"}},{"kind":"Field","name":{"kind":"Name","value":"stampStr1Type"}},{"kind":"Field","name":{"kind":"Name","value":"stampStr2"}},{"kind":"Field","name":{"kind":"Name","value":"stampStr2Type"}},{"kind":"Field","name":{"kind":"Name","value":"stampStr3"}},{"kind":"Field","name":{"kind":"Name","value":"stampStr3Type"}},{"kind":"Field","name":{"kind":"Name","value":"stampType"}},{"kind":"Field","name":{"kind":"Name","value":"cancelFlag"}},{"kind":"Field","name":{"kind":"Name","value":"flowId"}},{"kind":"Field","name":{"kind":"Name","value":"entityType"}},{"kind":"Field","name":{"kind":"Name","value":"entityId"}},{"kind":"Field","name":{"kind":"Name","value":"workflowInstanceId"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]} as unknown as DocumentNode<MatterStampFieldsFragment, unknown>;
+export const TenantApplicationDocumentFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationDocumentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplicationDocument"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicationId"}},{"kind":"Field","name":{"kind":"Name","value":"fileName"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"uploadedAt"}}]}}]} as unknown as DocumentNode<TenantApplicationDocumentFieldsFragment, unknown>;
+export const TenantApplicationFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplication"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicantOrgId"}},{"kind":"Field","name":{"kind":"Name","value":"applicantUserId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"contactName"}},{"kind":"Field","name":{"kind":"Name","value":"contactEmail"}},{"kind":"Field","name":{"kind":"Name","value":"contactPhone"}},{"kind":"Field","name":{"kind":"Name","value":"ownerName"}},{"kind":"Field","name":{"kind":"Name","value":"ownerEmail"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"workflowInstanceId"}},{"kind":"Field","name":{"kind":"Name","value":"createdOrgId"}},{"kind":"Field","name":{"kind":"Name","value":"submittedAt"}},{"kind":"Field","name":{"kind":"Name","value":"approvedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TenantApplicationDocumentFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationDocumentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplicationDocument"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicationId"}},{"kind":"Field","name":{"kind":"Name","value":"fileName"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"uploadedAt"}}]}}]} as unknown as DocumentNode<TenantApplicationFieldsFragment, unknown>;
+export const WorkflowTaskFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"WorkflowTaskFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"WorkflowTask"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"instanceId"}},{"kind":"Field","name":{"kind":"Name","value":"stepKey"}},{"kind":"Field","name":{"kind":"Name","value":"stepName"}},{"kind":"Field","name":{"kind":"Name","value":"assigneeType"}},{"kind":"Field","name":{"kind":"Name","value":"assigneeValue"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]} as unknown as DocumentNode<WorkflowTaskFieldsFragment, unknown>;
 export const BoardAnalyticsPageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"BoardAnalyticsPage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"periodDays"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"andpadAnalytics"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"periodDays"},"value":{"kind":"Variable","name":{"kind":"Name","value":"periodDays"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AndpadAnalyticsDashboardFields"}},{"kind":"Field","name":{"kind":"Name","value":"recordsByWeek"}},{"kind":"Field","name":{"kind":"Name","value":"projectHealthScore"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AndpadAnalyticsKpiFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndpadAnalyticsKpi"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"unit"}},{"kind":"Field","name":{"kind":"Name","value":"trendPct"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AndpadAnalyticsDashboardFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AndpadAnalyticsDashboard"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"periodDays"}},{"kind":"Field","name":{"kind":"Name","value":"kpis"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AndpadAnalyticsKpiFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"projectsByStatus"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"count"}}]}},{"kind":"Field","name":{"kind":"Name","value":"moduleUsage"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"moduleCode"}},{"kind":"Field","name":{"kind":"Name","value":"moduleName"}},{"kind":"Field","name":{"kind":"Name","value":"recordCount"}}]}},{"kind":"Field","name":{"kind":"Name","value":"billingTotal"}},{"kind":"Field","name":{"kind":"Name","value":"activeProjects"}},{"kind":"Field","name":{"kind":"Name","value":"recordsByWeek"}},{"kind":"Field","name":{"kind":"Name","value":"projectHealthScore"}},{"kind":"Field","name":{"kind":"Name","value":"budgetTotal"}},{"kind":"Field","name":{"kind":"Name","value":"costTotal"}},{"kind":"Field","name":{"kind":"Name","value":"budgetVariancePct"}},{"kind":"Field","name":{"kind":"Name","value":"costByMonth"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"month"}},{"kind":"Field","name":{"kind":"Name","value":"amount"}}]}},{"kind":"Field","name":{"kind":"Name","value":"generatedAt"}}]}}]} as unknown as DocumentNode<BoardAnalyticsPageQuery, BoardAnalyticsPageQueryVariables>;
 export const GenerateAnalyticsInsightDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"GenerateAnalyticsInsight"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"periodDays"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"generateAnalyticsInsight"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"periodDays"},"value":{"kind":"Variable","name":{"kind":"Name","value":"periodDays"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"summary"}},{"kind":"Field","name":{"kind":"Name","value":"strengths"}},{"kind":"Field","name":{"kind":"Name","value":"risks"}},{"kind":"Field","name":{"kind":"Name","value":"recommendations"}},{"kind":"Field","name":{"kind":"Name","value":"generatedAt"}}]}}]}}]} as unknown as DocumentNode<GenerateAnalyticsInsightMutation, GenerateAnalyticsInsightMutationVariables>;
 export const ProjectBudgetSummariesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ProjectBudgetSummaries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectBudgetSummaries"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"projectId"}},{"kind":"Field","name":{"kind":"Name","value":"projectName"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"contractAmount"}},{"kind":"Field","name":{"kind":"Name","value":"totalBudget"}},{"kind":"Field","name":{"kind":"Name","value":"totalActual"}},{"kind":"Field","name":{"kind":"Name","value":"billingTotal"}},{"kind":"Field","name":{"kind":"Name","value":"variancePct"}}]}}]}}]} as unknown as DocumentNode<ProjectBudgetSummariesQuery, ProjectBudgetSummariesQueryVariables>;
@@ -1928,5 +2149,13 @@ export const MatterStampsDocument = {"kind":"Document","definitions":[{"kind":"O
 export const DashboardUpdatedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"DashboardUpdated"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"dashboardUpdated"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"videosTotal"}},{"kind":"Field","name":{"kind":"Name","value":"learningPathsTotal"}},{"kind":"Field","name":{"kind":"Name","value":"quizzesTotal"}},{"kind":"Field","name":{"kind":"Name","value":"completionsThisMonth"}},{"kind":"Field","name":{"kind":"Name","value":"watchHoursThisMonth"}},{"kind":"Field","name":{"kind":"Name","value":"activeLearners"}}]}}]}}]} as unknown as DocumentNode<DashboardUpdatedSubscription, DashboardUpdatedSubscriptionVariables>;
 export const ProgressUpdatedDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"ProgressUpdated"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"learnerId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"progressUpdated"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"learnerId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"learnerId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"videoId"}},{"kind":"Field","name":{"kind":"Name","value":"positionSec"}},{"kind":"Field","name":{"kind":"Name","value":"completed"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}}]}}]}}]} as unknown as DocumentNode<ProgressUpdatedSubscription, ProgressUpdatedSubscriptionVariables>;
 export const LearningActivityDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"LearningActivity"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"learnerId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"learningActivity"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"learnerId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"learnerId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"kind"}},{"kind":"Field","name":{"kind":"Name","value":"learnerId"}},{"kind":"Field","name":{"kind":"Name","value":"videoId"}},{"kind":"Field","name":{"kind":"Name","value":"pathId"}},{"kind":"Field","name":{"kind":"Name","value":"quizId"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"occurredAt"}}]}}]}}]} as unknown as DocumentNode<LearningActivitySubscription, LearningActivitySubscriptionVariables>;
+export const TenantApplicationsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TenantApplications"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tenantApplications"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TenantApplicationFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPlatformTenantAdmin"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationDocumentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplicationDocument"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicationId"}},{"kind":"Field","name":{"kind":"Name","value":"fileName"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"uploadedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplication"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicantOrgId"}},{"kind":"Field","name":{"kind":"Name","value":"applicantUserId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"contactName"}},{"kind":"Field","name":{"kind":"Name","value":"contactEmail"}},{"kind":"Field","name":{"kind":"Name","value":"contactPhone"}},{"kind":"Field","name":{"kind":"Name","value":"ownerName"}},{"kind":"Field","name":{"kind":"Name","value":"ownerEmail"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"workflowInstanceId"}},{"kind":"Field","name":{"kind":"Name","value":"createdOrgId"}},{"kind":"Field","name":{"kind":"Name","value":"submittedAt"}},{"kind":"Field","name":{"kind":"Name","value":"approvedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TenantApplicationDocumentFields"}}]}}]}}]} as unknown as DocumentNode<TenantApplicationsQuery, TenantApplicationsQueryVariables>;
+export const TenantApplicationDetailDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TenantApplicationDetail"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tenantApplication"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TenantApplicationFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPlatformTenantAdmin"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationDocumentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplicationDocument"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicationId"}},{"kind":"Field","name":{"kind":"Name","value":"fileName"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"uploadedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplication"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicantOrgId"}},{"kind":"Field","name":{"kind":"Name","value":"applicantUserId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"contactName"}},{"kind":"Field","name":{"kind":"Name","value":"contactEmail"}},{"kind":"Field","name":{"kind":"Name","value":"contactPhone"}},{"kind":"Field","name":{"kind":"Name","value":"ownerName"}},{"kind":"Field","name":{"kind":"Name","value":"ownerEmail"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"workflowInstanceId"}},{"kind":"Field","name":{"kind":"Name","value":"createdOrgId"}},{"kind":"Field","name":{"kind":"Name","value":"submittedAt"}},{"kind":"Field","name":{"kind":"Name","value":"approvedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TenantApplicationDocumentFields"}}]}}]}}]} as unknown as DocumentNode<TenantApplicationDetailQuery, TenantApplicationDetailQueryVariables>;
+export const TenantApprovalTasksDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"TenantApprovalTasks"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"myWorkflowTasks"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"WorkflowTaskFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPlatformTenantAdmin"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"WorkflowTaskFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"WorkflowTask"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"instanceId"}},{"kind":"Field","name":{"kind":"Name","value":"stepKey"}},{"kind":"Field","name":{"kind":"Name","value":"stepName"}},{"kind":"Field","name":{"kind":"Name","value":"assigneeType"}},{"kind":"Field","name":{"kind":"Name","value":"assigneeValue"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}}]} as unknown as DocumentNode<TenantApprovalTasksQuery, TenantApprovalTasksQueryVariables>;
+export const CreateTenantApplicationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateTenantApplication"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreateTenantApplicationInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createTenantApplication"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TenantApplicationFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationDocumentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplicationDocument"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicationId"}},{"kind":"Field","name":{"kind":"Name","value":"fileName"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"uploadedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplication"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicantOrgId"}},{"kind":"Field","name":{"kind":"Name","value":"applicantUserId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"contactName"}},{"kind":"Field","name":{"kind":"Name","value":"contactEmail"}},{"kind":"Field","name":{"kind":"Name","value":"contactPhone"}},{"kind":"Field","name":{"kind":"Name","value":"ownerName"}},{"kind":"Field","name":{"kind":"Name","value":"ownerEmail"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"workflowInstanceId"}},{"kind":"Field","name":{"kind":"Name","value":"createdOrgId"}},{"kind":"Field","name":{"kind":"Name","value":"submittedAt"}},{"kind":"Field","name":{"kind":"Name","value":"approvedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TenantApplicationDocumentFields"}}]}}]}}]} as unknown as DocumentNode<CreateTenantApplicationMutation, CreateTenantApplicationMutationVariables>;
+export const UpdateTenantApplicationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateTenantApplication"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateTenantApplicationInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateTenantApplication"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TenantApplicationFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationDocumentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplicationDocument"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicationId"}},{"kind":"Field","name":{"kind":"Name","value":"fileName"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"uploadedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplication"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicantOrgId"}},{"kind":"Field","name":{"kind":"Name","value":"applicantUserId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"contactName"}},{"kind":"Field","name":{"kind":"Name","value":"contactEmail"}},{"kind":"Field","name":{"kind":"Name","value":"contactPhone"}},{"kind":"Field","name":{"kind":"Name","value":"ownerName"}},{"kind":"Field","name":{"kind":"Name","value":"ownerEmail"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"workflowInstanceId"}},{"kind":"Field","name":{"kind":"Name","value":"createdOrgId"}},{"kind":"Field","name":{"kind":"Name","value":"submittedAt"}},{"kind":"Field","name":{"kind":"Name","value":"approvedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TenantApplicationDocumentFields"}}]}}]}}]} as unknown as DocumentNode<UpdateTenantApplicationMutation, UpdateTenantApplicationMutationVariables>;
+export const UploadTenantApplicationDocumentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UploadTenantApplicationDocument"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UploadTenantApplicationDocumentInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uploadTenantApplicationDocument"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TenantApplicationDocumentFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationDocumentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplicationDocument"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicationId"}},{"kind":"Field","name":{"kind":"Name","value":"fileName"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"uploadedAt"}}]}}]} as unknown as DocumentNode<UploadTenantApplicationDocumentMutation, UploadTenantApplicationDocumentMutationVariables>;
+export const SubmitTenantApplicationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SubmitTenantApplication"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"submitTenantApplication"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TenantApplicationFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationDocumentFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplicationDocument"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicationId"}},{"kind":"Field","name":{"kind":"Name","value":"fileName"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"uploadedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TenantApplicationFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"TenantApplication"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"applicantOrgId"}},{"kind":"Field","name":{"kind":"Name","value":"applicantUserId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"contactName"}},{"kind":"Field","name":{"kind":"Name","value":"contactEmail"}},{"kind":"Field","name":{"kind":"Name","value":"contactPhone"}},{"kind":"Field","name":{"kind":"Name","value":"ownerName"}},{"kind":"Field","name":{"kind":"Name","value":"ownerEmail"}},{"kind":"Field","name":{"kind":"Name","value":"notes"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"workflowInstanceId"}},{"kind":"Field","name":{"kind":"Name","value":"createdOrgId"}},{"kind":"Field","name":{"kind":"Name","value":"submittedAt"}},{"kind":"Field","name":{"kind":"Name","value":"approvedAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"documents"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TenantApplicationDocumentFields"}}]}}]}}]} as unknown as DocumentNode<SubmitTenantApplicationMutation, SubmitTenantApplicationMutationVariables>;
+export const CompleteTenantApprovalTaskDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CompleteTenantApprovalTask"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CompleteWorkflowTaskInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"completeWorkflowTask"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"flowId"}},{"kind":"Field","name":{"kind":"Name","value":"entityType"}},{"kind":"Field","name":{"kind":"Name","value":"entityId"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"completedAt"}}]}}]}}]} as unknown as DocumentNode<CompleteTenantApprovalTaskMutation, CompleteTenantApprovalTaskMutationVariables>;
 export const VideosPageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"VideosPage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"category"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"VideoCategory"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"skillLevel"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"SkillLevel"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"search"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"page"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"videos"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"category"},"value":{"kind":"Variable","name":{"kind":"Name","value":"category"}}},{"kind":"Argument","name":{"kind":"Name","value":"skillLevel"},"value":{"kind":"Variable","name":{"kind":"Name","value":"skillLevel"}}},{"kind":"Argument","name":{"kind":"Name","value":"search"},"value":{"kind":"Variable","name":{"kind":"Name","value":"search"}}},{"kind":"Argument","name":{"kind":"Name","value":"page"},"value":{"kind":"Variable","name":{"kind":"Name","value":"page"}}},{"kind":"Argument","name":{"kind":"Name","value":"pageSize"},"value":{"kind":"IntValue","value":"12"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"procedure"}},{"kind":"Field","name":{"kind":"Name","value":"skillLevel"}},{"kind":"Field","name":{"kind":"Name","value":"durationSec"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnailUrl"}},{"kind":"Field","name":{"kind":"Name","value":"instructorName"}},{"kind":"Field","name":{"kind":"Name","value":"viewCount"}},{"kind":"Field","name":{"kind":"Name","value":"featured"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"total"}},{"kind":"Field","name":{"kind":"Name","value":"page"}},{"kind":"Field","name":{"kind":"Name","value":"pageSize"}},{"kind":"Field","name":{"kind":"Name","value":"totalPages"}}]}}]}}]}}]} as unknown as DocumentNode<VideosPageQuery, VideosPageQueryVariables>;
 export const VideoDetailPageDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"VideoDetailPage"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"learnerId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"video"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"procedure"}},{"kind":"Field","name":{"kind":"Name","value":"skillLevel"}},{"kind":"Field","name":{"kind":"Name","value":"durationSec"}},{"kind":"Field","name":{"kind":"Name","value":"thumbnailUrl"}},{"kind":"Field","name":{"kind":"Name","value":"videoUrl"}},{"kind":"Field","name":{"kind":"Name","value":"instructorId"}},{"kind":"Field","name":{"kind":"Name","value":"instructorName"}},{"kind":"Field","name":{"kind":"Name","value":"tags"}},{"kind":"Field","name":{"kind":"Name","value":"viewCount"}},{"kind":"Field","name":{"kind":"Name","value":"publishedAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"videoNotes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"videoId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"learnerId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"learnerId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"timestampSec"}},{"kind":"Field","name":{"kind":"Name","value":"body"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"quizzes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"videoId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"passingScore"}},{"kind":"Field","name":{"kind":"Name","value":"questions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"prompt"}},{"kind":"Field","name":{"kind":"Name","value":"choices"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"label"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"myProgress"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"learnerId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"learnerId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"videoId"}},{"kind":"Field","name":{"kind":"Name","value":"positionSec"}},{"kind":"Field","name":{"kind":"Name","value":"completed"}}]}},{"kind":"Field","name":{"kind":"Name","value":"myBookmarks"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"learnerId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"learnerId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"videoId"}}]}}]}}]} as unknown as DocumentNode<VideoDetailPageQuery, VideoDetailPageQueryVariables>;

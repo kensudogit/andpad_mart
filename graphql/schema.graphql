@@ -362,6 +362,10 @@ type Query {
     systemMatterId: String
     limit: Int = 50
   ): [MatterStamp!]!
+  tenantApplications: [TenantApplication!]!
+  tenantApplication(id: ID!): TenantApplication
+  isPlatformTenantAdmin: Boolean!
+  myWorkflowTasks: [WorkflowTask!]!
 }
 
 type Mutation {
@@ -397,6 +401,11 @@ type Mutation {
   createCostEntry(input: CreateCostEntryInput!): CostEntry!
   approveProjectBudget(id: ID!): ProjectBudget!
   createCostFromBilling(billingRecordId: ID!, projectId: ID!): CostEntry!
+  createTenantApplication(input: CreateTenantApplicationInput!): TenantApplication!
+  updateTenantApplication(input: UpdateTenantApplicationInput!): TenantApplication!
+  uploadTenantApplicationDocument(input: UploadTenantApplicationDocumentInput!): TenantApplicationDocument!
+  submitTenantApplication(id: ID!, imSessionId: String): TenantApplication!
+  completeWorkflowTask(input: CompleteWorkflowTaskInput!): WorkflowInstance!
 }
 
 type Subscription {
@@ -938,4 +947,120 @@ type MatterStamp {
   entityId: String
   workflowInstanceId: String
   createdAt: String
+}
+
+enum TenantApplicationStatus {
+  DRAFT
+  SUBMITTED
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  ACTIVE
+}
+
+type TenantApplicationDocument {
+  id: ID!
+  applicationId: ID!
+  fileName: String!
+  contentType: String
+  uploadedAt: String!
+}
+
+type TenantApplication {
+  id: ID!
+  applicantOrgId: ID!
+  applicantUserId: ID!
+  name: String!
+  slug: String!
+  address: String
+  contactName: String!
+  contactEmail: String!
+  contactPhone: String
+  ownerName: String!
+  ownerEmail: String!
+  notes: String
+  status: TenantApplicationStatus!
+  workflowInstanceId: ID
+  createdOrgId: ID
+  submittedAt: String
+  approvedAt: String
+  createdAt: String!
+  updatedAt: String!
+  documents: [TenantApplicationDocument!]!
+}
+
+input CreateTenantApplicationInput {
+  name: String!
+  slug: String
+  address: String
+  contactName: String!
+  contactEmail: String!
+  contactPhone: String
+  ownerName: String!
+  ownerEmail: String!
+  notes: String
+}
+
+input UpdateTenantApplicationInput {
+  id: ID!
+  name: String
+  slug: String
+  address: String
+  contactName: String
+  contactEmail: String
+  contactPhone: String
+  ownerName: String
+  ownerEmail: String
+  notes: String
+}
+
+input UploadTenantApplicationDocumentInput {
+  applicationId: ID!
+  fileName: String!
+  contentType: String
+  contentText: String
+}
+
+enum WorkflowAction {
+  SUBMIT
+  APPROVE
+  REJECT
+  RETURN
+  CANCEL
+}
+
+type WorkflowTask {
+  id: ID!
+  instanceId: ID!
+  stepKey: String!
+  stepName: String
+  assigneeType: String!
+  assigneeValue: String
+  status: String!
+  actionTaken: String
+  comment: String
+  actedByUserId: String
+  createdAt: String!
+  completedAt: String
+}
+
+type WorkflowInstance {
+  id: ID!
+  flowId: String!
+  flowName: String!
+  entityType: String!
+  entityId: String!
+  status: String!
+  currentStepKey: String
+  title: String!
+  createdAt: String!
+  updatedAt: String!
+  completedAt: String
+}
+
+input CompleteWorkflowTaskInput {
+  taskId: ID!
+  action: WorkflowAction!
+  comment: String
+  imSessionId: String
 }

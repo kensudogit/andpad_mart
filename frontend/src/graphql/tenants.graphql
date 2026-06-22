@@ -1,0 +1,99 @@
+fragment TenantApplicationDocumentFields on TenantApplicationDocument {
+  id
+  applicationId
+  fileName
+  contentType
+  uploadedAt
+}
+
+fragment TenantApplicationFields on TenantApplication {
+  id
+  applicantOrgId
+  applicantUserId
+  name
+  slug
+  address
+  contactName
+  contactEmail
+  contactPhone
+  ownerName
+  ownerEmail
+  notes
+  status
+  workflowInstanceId
+  createdOrgId
+  submittedAt
+  approvedAt
+  createdAt
+  updatedAt
+  documents {
+    ...TenantApplicationDocumentFields
+  }
+}
+
+fragment WorkflowTaskFields on WorkflowTask {
+  id
+  instanceId
+  stepKey
+  stepName
+  assigneeType
+  assigneeValue
+  status
+  createdAt
+}
+
+query TenantApplications {
+  tenantApplications {
+    ...TenantApplicationFields
+  }
+  isPlatformTenantAdmin
+}
+
+query TenantApplicationDetail($id: ID!) {
+  tenantApplication(id: $id) {
+    ...TenantApplicationFields
+  }
+  isPlatformTenantAdmin
+}
+
+query TenantApprovalTasks {
+  myWorkflowTasks {
+    ...WorkflowTaskFields
+  }
+  isPlatformTenantAdmin
+}
+
+mutation CreateTenantApplication($input: CreateTenantApplicationInput!) {
+  createTenantApplication(input: $input) {
+    ...TenantApplicationFields
+  }
+}
+
+mutation UpdateTenantApplication($input: UpdateTenantApplicationInput!) {
+  updateTenantApplication(input: $input) {
+    ...TenantApplicationFields
+  }
+}
+
+mutation UploadTenantApplicationDocument($input: UploadTenantApplicationDocumentInput!) {
+  uploadTenantApplicationDocument(input: $input) {
+    ...TenantApplicationDocumentFields
+  }
+}
+
+mutation SubmitTenantApplication($id: ID!) {
+  submitTenantApplication(id: $id) {
+    ...TenantApplicationFields
+  }
+}
+
+mutation CompleteTenantApprovalTask($input: CompleteWorkflowTaskInput!) {
+  completeWorkflowTask(input: $input) {
+    id
+    flowId
+    entityType
+    entityId
+    status
+    completedAt
+  }
+}

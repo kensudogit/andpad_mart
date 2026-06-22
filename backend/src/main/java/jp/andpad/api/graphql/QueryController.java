@@ -53,6 +53,8 @@ import jp.andpad.api.domain.SaasModuleCode;
 import jp.andpad.api.domain.Session;
 import jp.andpad.api.domain.SkillLevel;
 import jp.andpad.api.domain.TeamMember;
+import jp.andpad.api.domain.TenantApplication;
+import jp.andpad.api.domain.TenantApplicationDocument;
 import jp.andpad.api.domain.UsageSummary;
 import jp.andpad.api.domain.VideoCategory;
 import jp.andpad.api.service.AuthService;
@@ -65,6 +67,8 @@ import jp.andpad.api.service.OrganizationService;
 import jp.andpad.api.service.SaasService;
 import jp.andpad.api.service.MatterStampService;
 import jp.andpad.api.service.MonitoringFlowService;
+import jp.andpad.api.security.TenantContext;
+import jp.andpad.api.service.TenantApplicationService;
 import jp.andpad.api.service.MailMessageService;
 import jp.andpad.api.service.WorkflowService;
 import lombok.RequiredArgsConstructor;
@@ -85,6 +89,7 @@ public class QueryController {
     private final MailMessageService mailMessageService;
     private final MonitoringFlowService monitoringFlowService;
     private final MatterStampService matterStampService;
+    private final TenantApplicationService tenantApplicationService;
 
     @QueryMapping
     public Health health() {
@@ -356,5 +361,22 @@ public class QueryController {
             @Argument String systemMatterId,
             @Argument Integer limit) {
         return matterStampService.listStamps(flowId, entityType, entityId, systemMatterId, limit, null);
+    }
+
+    @QueryMapping
+    public List<TenantApplication> tenantApplications() {
+        return tenantApplicationService.listApplications();
+    }
+
+    @QueryMapping
+    public TenantApplication tenantApplication(@Argument String id) {
+        return tenantApplicationService.getApplication(id);
+    }
+
+    @QueryMapping
+    public boolean isPlatformTenantAdmin() {
+        return TenantContext.principal()
+                .map(TenantApplicationService::isPlatformAdmin)
+                .orElse(false);
     }
 }

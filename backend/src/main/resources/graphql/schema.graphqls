@@ -366,6 +366,9 @@ type Query {
     systemMatterId: String
     limit: Int = 50
   ): [MatterStamp!]!
+  tenantApplications: [TenantApplication!]!
+  tenantApplication(id: ID!): TenantApplication
+  isPlatformTenantAdmin: Boolean!
 }
 
 type Mutation {
@@ -404,6 +407,10 @@ type Mutation {
   startWorkflow(input: StartWorkflowInput!): WorkflowInstance!
   submitWorkflow(instanceId: ID!, imSessionId: String): WorkflowInstance!
   completeWorkflowTask(input: CompleteWorkflowTaskInput!): WorkflowInstance!
+  createTenantApplication(input: CreateTenantApplicationInput!): TenantApplication!
+  updateTenantApplication(input: UpdateTenantApplicationInput!): TenantApplication!
+  uploadTenantApplicationDocument(input: UploadTenantApplicationDocumentInput!): TenantApplicationDocument!
+  submitTenantApplication(id: ID!, imSessionId: String): TenantApplication!
 }
 
 type Subscription {
@@ -1042,4 +1049,76 @@ type MatterStamp {
   entityId: String
   workflowInstanceId: String
   createdAt: String
+}
+
+enum TenantApplicationStatus {
+  DRAFT
+  SUBMITTED
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  ACTIVE
+}
+
+type TenantApplicationDocument {
+  id: ID!
+  applicationId: ID!
+  fileName: String!
+  contentType: String
+  uploadedAt: String!
+}
+
+type TenantApplication {
+  id: ID!
+  applicantOrgId: ID!
+  applicantUserId: ID!
+  name: String!
+  slug: String!
+  address: String
+  contactName: String!
+  contactEmail: String!
+  contactPhone: String
+  ownerName: String!
+  ownerEmail: String!
+  notes: String
+  status: TenantApplicationStatus!
+  workflowInstanceId: ID
+  createdOrgId: ID
+  submittedAt: String
+  approvedAt: String
+  createdAt: String!
+  updatedAt: String!
+  documents: [TenantApplicationDocument!]!
+}
+
+input CreateTenantApplicationInput {
+  name: String!
+  slug: String
+  address: String
+  contactName: String!
+  contactEmail: String!
+  contactPhone: String
+  ownerName: String!
+  ownerEmail: String!
+  notes: String
+}
+
+input UpdateTenantApplicationInput {
+  id: ID!
+  name: String
+  slug: String
+  address: String
+  contactName: String
+  contactEmail: String
+  contactPhone: String
+  ownerName: String
+  ownerEmail: String
+  notes: String
+}
+
+input UploadTenantApplicationDocumentInput {
+  applicationId: ID!
+  fileName: String!
+  contentType: String
+  contentText: String
 }

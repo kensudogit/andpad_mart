@@ -335,7 +335,8 @@ public class DemoSeeder {
                     ('wfdef_generic_two', 'org_demo', 'generic-two-step-approval', '汎用二段承認', 1, 'GENERIC', '上長→部門長の2段階承認'),
                     ('wfdef_budget', 'org_demo', 'budget-approval', '予算承認', 1, 'PROJECT_BUDGET', '現場責任者→経理の予算承認'),
                     ('wfdef_leave', 'org_demo', 'leave-approval', '休暇申請', 1, 'LEAVE_REQUEST', '休暇申請の上長承認'),
-                    ('wfdef_doc', 'org_demo', 'document-approval', '書類承認', 1, 'DOCUMENT', '書類レビュー→最終承認')
+                    ('wfdef_doc', 'org_demo', 'document-approval', '書類承認', 1, 'DOCUMENT', '書類レビュー→最終承認'),
+                    ('wfdef_tenant', 'org_demo', 'tenant-provisioning', 'テナント作成承認', 1, 'TENANT_APPLICATION', '新規テナント作成のプラットフォーム承認')
                 ON CONFLICT (id) DO NOTHING
                 """);
         jdbc.update(
@@ -359,7 +360,10 @@ public class DemoSeeder {
                     ('wfstep_dc_submit', 'wfdef_doc', 'submit', '起票', 0, 'SUBMIT', 'SUBMITTER', NULL, NULL),
                     ('wfstep_dc_rev', 'wfdef_doc', 'reviewer_approval', 'レビュー', 1, 'APPROVAL', 'ROLE', 'manager', 'node_doc_review'),
                     ('wfstep_dc_fin', 'wfdef_doc', 'final_approval', '最終承認', 2, 'APPROVAL', 'ROLE', 'admin', 'node_doc_final'),
-                    ('wfstep_dc_end', 'wfdef_doc', 'complete', '完了', 99, 'END', 'ANY', NULL, NULL)
+                    ('wfstep_dc_end', 'wfdef_doc', 'complete', '完了', 99, 'END', 'ANY', NULL, NULL),
+                    ('wfstep_tp_submit', 'wfdef_tenant', 'submit', '起票', 0, 'SUBMIT', 'SUBMITTER', NULL, NULL),
+                    ('wfstep_tp_admin', 'wfdef_tenant', 'platform_approval', 'プラットフォーム承認', 1, 'APPROVAL', 'ROLE', 'admin', 'node_tenant_admin'),
+                    ('wfstep_tp_end', 'wfdef_tenant', 'complete', '完了', 99, 'END', 'ANY', NULL, NULL)
                 ON CONFLICT (id) DO NOTHING
                 """);
     }
