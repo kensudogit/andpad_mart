@@ -5,7 +5,7 @@
  */
 import Link from 'next/link'
 import { useMutation, useQuery } from '@apollo/client/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { DocumentApprovalWorkflowDiagram } from '@/components/DocumentApprovalWorkflowDiagram'
 import { DocApprovalAsyncProcessPanel } from '@/components/DocApprovalAsyncProcessPanel'
 import { DocApprovalCnfmActvPanel } from '@/components/DocApprovalCnfmActvPanel'
@@ -29,6 +29,8 @@ function fmtDate(s?: string | null) {
   if (!s) return '—'
   return s.slice(0, 10)
 }
+
+const RECORDS_PAGE_SIZE = 10
 
 /** GraphQL エラーをユーザー向け文言に変換 */
 function gqlError(err: { message?: string } | undefined, fallback: string) {
@@ -56,6 +58,7 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
   const [amount, setAmount] = useState('')
   const [projectId, setProjectId] = useState('__all__')
   const [mailRefreshKey, setMailRefreshKey] = useState(0)
+  const [page, setPage] = useState(1)
 
   const { data: projectsData, loading: projectsLoading } = useQuery(ConstructionProjectsDocument, {
     fetchPolicy: 'network-only',
@@ -82,7 +85,22 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
 
   const projects = projectsData?.constructionProjects ?? []
   const items = data?.projectModuleRecords ?? []
+  const totalPages = Math.max(1, Math.ceil(items.length / RECORDS_PAGE_SIZE))
+  const pageItems = useMemo(() => {
+    const start = (page - 1) * RECORDS_PAGE_SIZE
+    return items.slice(start, start + RECORDS_PAGE_SIZE)
+  }, [items, page])
   const err = gqlError(error ?? mutErr, ui.saasLoadFailed)
+
+  useEffect(() => {
+    setPage(1)
+  }, [projectId, moduleCode])
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages)
+    }
+  }, [page, totalPages])
 
   useEffect(() => {
     if (!projectId && projects.length > 0) {
@@ -211,7 +229,7 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
                     </td>
                   </tr>
                 ) : (
-                  items.map((r) => (
+                  pageItems.map((r) => (
                     <tr key={r.id}>
                       <td>{r.projectName}</td>
                       <td>
@@ -229,6 +247,29 @@ export function ConstructionModuleClient({ module: slug }: { module: Constructio
                 )}
               </tbody>
             </table>
+            {items.length > RECORDS_PAGE_SIZE ? (
+              <div className="pagination-bar saas-table-pagination">
+                <button
+                  type="button"
+                  className="filter-link"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  {ui.prev}
+                </button>
+                <span className="saas-table-pagination-info">
+                  {ui.pageOf(page, totalPages, items.length)}
+                </span>
+                <button
+                  type="button"
+                  className="filter-link"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  {ui.next}
+                </button>
+              </div>
+            ) : null}
           </div>
         )}
       </section>

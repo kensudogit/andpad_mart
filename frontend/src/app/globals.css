@@ -593,6 +593,24 @@ html, body {
   justify-content: center;
 }
 
+.pagination-bar .filter-link:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.saas-table-pagination {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border);
+}
+
+.saas-table-pagination-info {
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding: 0 0.25rem;
+}
+
 .video-detail-layout {
   display: grid;
   grid-template-columns: 1fr 320px;
