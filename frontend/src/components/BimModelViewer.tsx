@@ -47,12 +47,13 @@ type BimModelViewerProps = {
 export function BimModelViewer({ src, alt }: BimModelViewerProps) {
   const viewerRef = useRef<HTMLElement | null>(null)
   const revokeRef = useRef<(() => void) | null>(null)
+  const activeRef = useRef(true)
   const [displaySrc, setDisplaySrc] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let cancelled = false
+    activeRef.current = true
     setLoading(true)
     setError(null)
     setDisplaySrc(null)
@@ -62,23 +63,23 @@ export function BimModelViewer({ src, alt }: BimModelViewerProps) {
     void (async () => {
       try {
         const resolved = await resolveBimModelObjectUrl(src)
-        if (cancelled) {
+        if (!activeRef.current) {
           resolved.revoke()
           return
         }
         revokeRef.current = resolved.revoke
         setDisplaySrc(resolved.url)
       } catch (err) {
-        if (!cancelled) {
+        if (activeRef.current) {
           setError(err instanceof Error ? err.message : ui.bimViewerLoadError)
         }
       } finally {
-        if (!cancelled) setLoading(false)
+        if (activeRef.current) setLoading(false)
       }
     })()
 
     return () => {
-      cancelled = true
+      activeRef.current = false
       revokeRef.current?.()
       revokeRef.current = null
     }
@@ -88,27 +89,22 @@ export function BimModelViewer({ src, alt }: BimModelViewerProps) {
     const el = viewerRef.current
     if (!el || !displaySrc) return
 
-    el.setAttribute('src', displaySrc)
-    el.setAttribute('alt', alt)
-    el.setAttribute('camera-controls', '')
-    el.setAttribute('auto-rotate', '')
-    el.setAttribute('shadow-intensity', '1')
-    el.setAttribute('exposure', '1')
-    el.setAttribute('interaction-prompt', 'none')
-    el.style.width = '100%'
-    el.style.height = '100%'
-    el.style.display = 'block'
-    el.style.background = '#1a1f2e'
+    const onError = (event: Event) => {
+      if (!activeRef.current) return
+      const detail = (event as CustomEvent<{ message?: string }>).detail?.message
+      setError(detail?.trim() || ui.bimViewerLoadError)
+    }
+    const onLoad = () => {
+      if (activeRef.current) setError(null)
+    }
 
-    const onError = () => setError(ui.bimViewerLoadError)
-    const onLoad = () => setError(null)
     el.addEventListener('error', onError)
     el.addEventListener('load', onLoad)
     return () => {
       el.removeEventListener('error', onError)
       el.removeEventListener('load', onLoad)
     }
-  }, [displaySrc, alt])
+  }, [displaySrc])
 
   if (loading) {
     return (
@@ -126,8 +122,30 @@ export function BimModelViewer({ src, alt }: BimModelViewerProps) {
     )
   }
 
+  if (!displaySrc) {
+    return (
+      <div className="bim-viewer-poster">
+        <p className="alert small">{ui.bimViewerLoadError}</p>
+      </div>
+    )
+  }
+
   return createElement('model-viewer', {
+    key: displaySrc,
     ref: viewerRef,
     className: 'bim-model-viewer',
+    src: displaySrc,
+    alt,
+    'camera-controls': '',
+    'auto-rotate': '',
+    'shadow-intensity': '1',
+    'exposure': '1',
+    'interaction-prompt': 'none',
+    style: {
+      width: '100%',
+      height: '100%',
+      display: 'block',
+      background: '#1a1f2e',
+    },
   })
 }

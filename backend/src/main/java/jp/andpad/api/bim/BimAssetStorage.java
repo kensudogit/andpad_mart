@@ -15,6 +15,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jp.andpad.api.repository.BimFileRepository;
 import lombok.extern.slf4j.Slf4j;
 
@@ -100,6 +103,10 @@ public class BimAssetStorage {
             throw new IllegalArgumentException("unsupported file type: " + normalizedType);
         }
 
+        if (KIND_MODEL.equals(fileKind)) {
+            assertGltfSelfContained(bytes);
+        }
+
         String extension = extensionFor(normalizedType, originalFileName, fileKind);
         String storedName = UUID.randomUUID() + extension;
         Path orgDir = uploadRoot.resolve(sanitizeOrgId(orgId));
@@ -182,6 +189,43 @@ public class BimAssetStorage {
 
     private static boolean isModelContentType(String normalizedType) {
         return normalizedType.startsWith("model/gltf");
+    }
+
+    private static boolean looksLikeGltfJson(byte[] bytes) {
+        for (int i = 0; i < Math.min(bytes.length, 256); i++) {
+            byte b = bytes[i];
+            if (!Character.isWhitespace(b)) {
+                return b == '{';
+            }
+        }
+        return false;
+    }
+
+    private static void assertGltfSelfContained(byte[] bytes) {
+        if (!looksLikeGltfJson(bytes)) {
+            return;
+        }
+        try {
+            JsonNode root = new ObjectMapper().readTree(bytes);
+            JsonNode buffers = root.get("buffers");
+            if (buffers == null || !buffers.isArray()) {
+                return;
+            }
+            for (JsonNode buffer : buffers) {
+                JsonNode uri = buffer.get("uri");
+                if (uri != null && uri.isTextual()) {
+                    String value = uri.asText("");
+                    if (!value.isBlank() && !value.startsWith("data:")) {
+                        throw new IllegalArgumentException(
+                                "external GLTF buffer files are not supported; upload a single .glb file instead");
+                    }
+                }
+            }
+        } catch (IllegalArgumentException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("invalid GLTF JSON", ex);
+        }
     }
 
     private static boolean looksLikeModelBytes(byte[] bytes) {

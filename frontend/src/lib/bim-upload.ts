@@ -12,6 +12,16 @@ export type BimUploadResult = {
   bimModelId?: string
 }
 
+function translateUploadError(message: string): string {
+  if (message.includes('external GLTF buffer')) {
+    return '外部 .bin を参照する GLTF は非対応です。単一ファイルの GLB でアップロードしてください'
+  }
+  if (message.includes('file is empty')) {
+    return 'ファイルが空です。別の GLB ファイルを選択してください'
+  }
+  return message
+}
+
 async function uploadBimFile(
   endpoint: '/api/saas/bim/upload' | '/api/saas/bim/upload/model',
   file: File,
@@ -58,7 +68,7 @@ async function uploadBimFile(
         message = raw.trim().slice(0, 300)
       }
     }
-    throw new Error(message)
+    throw new Error(translateUploadError(message))
   }
 
   return (await res.json()) as BimUploadResult
