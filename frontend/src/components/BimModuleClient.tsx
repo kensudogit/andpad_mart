@@ -20,7 +20,7 @@ import {
   isEmbeddableViewerPage,
   resolveBimViewerUrl,
 } from '@/lib/bim-assets'
-import { uploadBimThumbnail } from '@/lib/bim-upload'
+import { uploadBimModel, uploadBimThumbnail } from '@/lib/bim-upload'
 import { graphQLErrorHint, isAuthRequiredGraphQLError } from '@/lib/graphql-errors'
 import { ui } from '@/lib/ui'
 
@@ -117,6 +117,28 @@ export function BimModuleClient() {
     }
   }
 
+  async function handleModelUpload(file: File, targetModelId?: string) {
+    setUploadBusy(true)
+    setUploadMessage(null)
+    try {
+      const result = await uploadBimModel(file, targetModelId)
+      if (!targetModelId) {
+        setViewerUrl(result.url)
+        setFormat('glTF')
+        if (result.fileSizeMb != null) {
+          setFileSize(result.fileSizeMb.toFixed(1))
+        }
+      }
+      await refetch()
+      setUploadMessage(ui.bimModelUploadDone)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : ui.bimUploadFailed
+      setUploadMessage(msg)
+    } finally {
+      setUploadBusy(false)
+    }
+  }
+
   if (loading) return <p className="muted">{ui.boardLoading}</p>
 
   if (error) {
@@ -160,6 +182,20 @@ export function BimModuleClient() {
             <option value="Revit">Revit</option>
           </select>
           <input value={viewerUrl} onChange={(e) => setViewerUrl(e.target.value)} placeholder={ui.bimViewerUrl} />
+          <label className="btn btn-ghost bim-upload-btn">
+            {uploadBusy ? ui.bimUploading : ui.bimUploadModel}
+            <input
+              type="file"
+              accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+              className="bim-upload-input"
+              disabled={uploadBusy}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) void handleModelUpload(file)
+                e.target.value = ''
+              }}
+            />
+          </label>
           <input value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} placeholder={ui.bimThumbnailUrl} />
           <label className="btn btn-ghost bim-upload-btn">
             {uploadBusy ? ui.bimUploading : ui.bimUploadThumbnail}
@@ -198,7 +234,17 @@ export function BimModuleClient() {
             {ui.saasCreate}
           </button>
         </div>
-        {uploadMessage ? <p className={`small${uploadMessage === ui.bimUploadDone ? ' text-ok' : ' alert'}`}>{uploadMessage}</p> : null}
+        {uploadMessage ? (
+          <p
+            className={`small${
+              uploadMessage === ui.bimUploadDone || uploadMessage === ui.bimModelUploadDone
+                ? ' text-ok'
+                : ' alert'
+            }`}
+          >
+            {uploadMessage}
+          </p>
+        ) : null}
         {thumbnailUrl ? (
           <div className="bim-thumb-preview">
             <BimModelThumbnail
@@ -255,6 +301,20 @@ export function BimModuleClient() {
                 {selected.title} ({selected.format}) — {selected.uploadedBy}
               </p>
               <div className="bim-viewer-toolbar">
+                <label className="btn btn-ghost bim-upload-btn">
+                  {uploadBusy ? ui.bimUploading : ui.bimUpdateModel}
+                  <input
+                    type="file"
+                    accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+                    className="bim-upload-input"
+                    disabled={uploadBusy}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) void handleModelUpload(file, selected.id)
+                      e.target.value = ''
+                    }}
+                  />
+                </label>
                 <label className="btn btn-ghost bim-upload-btn">
                   {uploadBusy ? ui.bimUploading : ui.bimUpdateThumbnail}
                   <input

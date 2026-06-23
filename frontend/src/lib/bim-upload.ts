@@ -1,20 +1,22 @@
 /**
- * BIM サムネイル画像アップロード（multipart → バックエンド API）。
+ * BIM ファイルアップロード（サムネイル / 3D モデル）。
  */
 import { getAuthToken } from '@/lib/auth-session'
 
-export type BimThumbnailUploadResult = {
+export type BimUploadResult = {
   url: string
   fileName?: string
   contentType?: string
   sizeBytes?: number
+  fileSizeMb?: number
   bimModelId?: string
 }
 
-export async function uploadBimThumbnail(
+async function uploadBimFile(
+  endpoint: '/api/saas/bim/upload' | '/api/saas/bim/upload/model',
   file: File,
   bimModelId?: string,
-): Promise<BimThumbnailUploadResult> {
+): Promise<BimUploadResult> {
   const form = new FormData()
   form.append('file', file)
   if (bimModelId) {
@@ -27,7 +29,7 @@ export async function uploadBimThumbnail(
     headers.Authorization = `Bearer ${token}`
   }
 
-  const res = await fetch('/api/saas/bim/upload', {
+  const res = await fetch(endpoint, {
     method: 'POST',
     body: form,
     credentials: 'include',
@@ -45,7 +47,15 @@ export async function uploadBimThumbnail(
     throw new Error(message)
   }
 
-  return (await res.json()) as BimThumbnailUploadResult
+  return (await res.json()) as BimUploadResult
+}
+
+export async function uploadBimThumbnail(file: File, bimModelId?: string) {
+  return uploadBimFile('/api/saas/bim/upload', file, bimModelId)
+}
+
+export async function uploadBimModel(file: File, bimModelId?: string) {
+  return uploadBimFile('/api/saas/bim/upload/model', file, bimModelId)
 }
 
 export function isUploadedBimThumbnail(url?: string | null) {

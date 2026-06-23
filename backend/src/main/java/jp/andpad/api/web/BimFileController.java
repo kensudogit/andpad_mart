@@ -57,6 +57,34 @@ public class BimFileController {
         return body;
     }
 
+    @PostMapping(value = "/upload/model", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Map<String, Object> uploadModel(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "bimModelId", required = false) String bimModelId)
+            throws IOException {
+        String orgId = requireOrgId();
+        StoredBimAsset stored = bimAssetStorage.storeModel(
+                orgId,
+                file.getOriginalFilename(),
+                file.getContentType(),
+                file.getBytes());
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("url", stored.url());
+        body.put("fileName", file.getOriginalFilename());
+        body.put("contentType", stored.contentType());
+        body.put("sizeBytes", stored.sizeBytes());
+        body.put("fileSizeMb", stored.sizeBytes() / (1024.0 * 1024.0));
+
+        if (bimModelId != null && !bimModelId.isBlank()) {
+            BimModel updated = extendedService.updateBimModelViewer(
+                    bimModelId, stored.url(), stored.sizeBytes() / (1024.0 * 1024.0));
+            body.put("bimModelId", updated.id());
+            body.put("bimModel", updated);
+        }
+        return body;
+    }
+
     @GetMapping("/files/{orgId}/{fileName}")
     public ResponseEntity<Resource> serveFile(@PathVariable String orgId, @PathVariable String fileName)
             throws IOException {
@@ -64,14 +92,14 @@ public class BimFileController {
         if (currentOrg == null || !currentOrg.equals(orgId)) {
             return ResponseEntity.notFound().build();
         }
-        Resource resource = bimAssetStorage.load(orgId, fileName);
-        if (resource == null || !resource.exists()) {
+        var loaded = bimAssetStorage.load(orgId, fileName);
+        if (loaded == null || !loaded.resource().exists()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok()
                 .header(HttpHeaders.CACHE_CONTROL, "private, max-age=3600")
-                .contentType(MediaType.parseMediaType(bimAssetStorage.contentTypeFor(fileName)))
-                .body(resource);
+                .contentType(MediaType.parseMediaType(loaded.contentType()))
+                .body(loaded.resource());
     }
 
     private static String requireOrgId() {

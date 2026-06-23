@@ -349,6 +349,18 @@ public class ExtendedRepository {
         }
     }
 
+    public void updateBimModelViewer(String orgId, String id, String viewerUrl, Double fileSizeMb) {
+        int updated = jdbc.update(
+                "UPDATE bim_models SET viewer_url = ?, file_size_mb = ?, format = 'glTF' WHERE id = ? AND org_id = ?",
+                viewerUrl,
+                fileSizeMb,
+                id,
+                orgId);
+        if (updated == 0) {
+            throw new IllegalArgumentException("BIM model not found");
+        }
+    }
+
     private List<MonthlyCostMetric> orgMonthlyCosts(String orgId, int months) {
         LocalDate since = LocalDate.now().minusMonths(months - 1L).withDayOfMonth(1);
         Map<String, Double> byMonth = new HashMap<>();

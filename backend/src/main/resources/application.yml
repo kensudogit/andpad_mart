@@ -28,8 +28,8 @@ spring:
       enabled: true
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 12MB
+      max-file-size: 55MB
+      max-request-size: 60MB
 
 app:
   imart:
@@ -73,6 +73,8 @@ app:
   bim:
     upload-dir: ${BIM_UPLOAD_DIR:uploads/bim}
     max-image-bytes: ${BIM_MAX_IMAGE_BYTES:5242880}
+    max-model-bytes: ${BIM_MAX_MODEL_BYTES:52428800}
+    store-in-database: ${BIM_STORE_IN_DATABASE:true}
 
 management:
   endpoints:

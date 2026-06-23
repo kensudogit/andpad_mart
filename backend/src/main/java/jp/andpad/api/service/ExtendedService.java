@@ -65,6 +65,22 @@ public class ExtendedService {
         return updated;
     }
 
+    public BimModel updateBimModelViewer(String bimModelId, String viewerUrl, Double fileSizeMb) {
+        String orgId = TenantContext.orgId();
+        if (orgId == null || orgId.isBlank()) {
+            throw new IllegalStateException("organization context is required");
+        }
+        if (viewerUrl == null || viewerUrl.isBlank()) {
+            throw new IllegalArgumentException("viewerUrl is required");
+        }
+        extendedRepository.updateBimModelViewer(orgId, bimModelId, viewerUrl.trim(), fileSizeMb);
+        BimModel updated = extendedRepository.getBimModel(orgId, bimModelId);
+        if (updated == null) {
+            throw new IllegalArgumentException("BIM model not found");
+        }
+        return updated;
+    }
+
     public AnalyticsInsight generateAnalyticsInsight(int periodDays) {
         AndpadAnalyticsDashboard dash = andpadAnalytics(periodDays);
         return fallbackConstructionInsight(dash);

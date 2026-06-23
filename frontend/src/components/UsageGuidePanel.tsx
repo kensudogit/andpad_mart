@@ -64,6 +64,7 @@ const saasFeatured: FeaturedBlock = {
   items: [
     '施工管理 · 図面 · 黒板 · 検査 · ボード · 引合粗利 · 受発注',
     '請求 · 歩掛 · 入退場 · 電子納品 · BM · 予算原価 · Analytics · BIM · API 連携',
+    'BIM /saas/bim — サムネイル画像 · GLB/GLTF 3Dモデルのアップロード · model-viewer 表示',
     '資料承認 /saas/doc-approval — WF 図 · モニタリング · 印影 · 送信メール確認',
     'デモ: demo@sakura-dental.jp / demo1234 → /projects → /saas',
     '組織設定 /settings — プラン · 利用量 · Team ロール',
@@ -134,6 +135,7 @@ const L = {
         '/saas — 19 モジュール ON/OFF · 各機能画面へ',
         '/saas/budget — 予算 · 原価 · 請求突合 · CSV 出力',
         '/saas/analytics — KPI · 予算原価タブ · 案件別サマリー',
+        '/saas/bim — BIM モデル一覧 · サムネイル/GLB アップロード · 3D ビューワ',
         '/saas/doc-approval — 資料承認 · WF · モニタリング · 印影 · メール',
         'GraphQL: saasModules · setSaasModuleEnabled',
       ],
@@ -296,7 +298,26 @@ const L = {
       ],
     },
     {
-      title: '13. テナント管理（新規テナント作成）',
+      title: '13. BIM ファイルアップロード（サムネイル · 3D モデル）',
+      body:
+        'BIM モジュールでサムネイル画像と GLB/GLTF 3D モデルをアップロードできます。ファイルはディスクと PostgreSQL（BYTEA）の両方に保存され、Railway 等のエフェメラルディスク再起動後も DB から配信されます。',
+      items: [
+        '【画面】/saas/bim — モデル一覧 · 新規登録 · 既存モデルのサムネイル/3D 更新',
+        '【サムネイル】JPEG/PNG/WebP/GIF/SVG · 最大 5MB',
+        '  POST /api/saas/bim/upload/thumbnail（Next.js プロキシ: /api/saas/bim/upload）',
+        '【3D モデル】GLB/GLTF · 最大 50MB · model-viewer でインライン表示',
+        '  POST /api/saas/bim/upload/model',
+        '  IFC/Revit は 3D ビューワ非対応（サムネイルのみ）',
+        '【配信】GET /api/saas/bim/files/{orgId}/{fileName} — org_id 一致時のみ',
+        '  ディスクに無い場合は bim_uploaded_files（V021）から読込',
+        '【設定】app.bim.store-in-database=true（デフォルト）',
+        '  app.bim.upload-dir · max-image-bytes · max-model-bytes',
+        '  本番 — BIM_STORE_IN_DATABASE=true · 必要なら BIM_UPLOAD_DIR を永続ボリュームへ',
+        '【デモ】demo@sakura-dental.jp → /saas/bim → 既存モデルで GLB をアップロードして 3D 表示確認',
+      ],
+    },
+    {
+      title: '14. テナント管理（新規テナント作成）',
       body:
         'プラットフォームにログイン後、/tenants から新規テナントの申請・書類登録・承認申請まで6ステップで進められます。承認完了後に organizations が作成されます。',
       items: [

@@ -26,13 +26,16 @@ export function getBimThumbKind(
 export function canUseModelViewer(format?: string | null, viewerUrl?: string | null) {
   const resolved = resolveBimViewerUrl(format, viewerUrl)
   const url = resolved.toLowerCase()
-  if (url.endsWith('.glb') || url.endsWith('.gltf')) return true
+  if (isUploadedBimAsset(url) || url.endsWith('.glb') || url.endsWith('.gltf')) return true
   const fmt = (format ?? '').toLowerCase()
   return fmt.includes('gltf') || fmt === 'glb'
 }
 
 export function resolveBimViewerUrl(format?: string | null, viewerUrl?: string | null) {
   const url = (viewerUrl ?? '').trim()
+  if (url.includes('/api/saas/bim/files/')) {
+    return url
+  }
   if (url && !url.includes('modelviewer.dev') && (url.endsWith('.glb') || url.endsWith('.gltf'))) {
     return url
   }
@@ -42,6 +45,10 @@ export function resolveBimViewerUrl(format?: string | null, viewerUrl?: string |
     return BIM_SAMPLE_MODEL_HELMET
   }
   return url
+}
+
+export function isUploadedBimAsset(url?: string | null) {
+  return Boolean(url && url.includes('/api/saas/bim/files/'))
 }
 
 export function isEmbeddableViewerPage(viewerUrl?: string | null) {
