@@ -3,10 +3,10 @@
 /**
  * BIM クラウドビューワ（モデル登録・model-viewer 表示）。
  */
-import Script from 'next/script'
 import Link from 'next/link'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { createElement, useEffect, useState } from 'react'
+import { BimThumbnailArt } from '@/components/BimThumbnailArt'
 import {
   BimModelsDocument,
   ConstructionProjectsDocument,
@@ -14,28 +14,47 @@ import {
 } from '@/lib/generated/graphql'
 import {
   BIM_SAMPLE_MODEL_HELMET,
-  BIM_THUMB_DEFAULT,
-  BIM_THUMB_STRUCTURE,
   canUseModelViewer,
+  defaultThumbnailForFormat,
+  getBimThumbKind,
   isEmbeddableViewerPage,
-  resolveBimThumbnail,
+  resolveBimViewerUrl,
 } from '@/lib/bim-assets'
 import { graphQLErrorHint, isAuthRequiredGraphQLError } from '@/lib/graphql-errors'
 import { ui } from '@/lib/ui'
 
-function BimThumbnail({ src, className }: { src: string; className?: string }) {
-  const [failed, setFailed] = useState(false)
-  const resolved = failed ? BIM_THUMB_DEFAULT : resolveBimThumbnail(src)
+const MODEL_VIEWER_SRC =
+  'https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js'
 
-  return (
-    <img
-      src={resolved}
-      alt=""
-      className={className}
-      loading="lazy"
-      onError={() => setFailed(true)}
-    />
-  )
+function useModelViewerReady() {
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const markReady = () => {
+      if (customElements.get('model-viewer')) {
+        setReady(true)
+        return true
+      }
+      return false
+    }
+
+    if (markReady()) return
+
+    customElements.whenDefined('model-viewer').then(() => setReady(true))
+
+    const existing = document.querySelector(`script[src="${MODEL_VIEWER_SRC}"]`)
+    if (!existing) {
+      const script = document.createElement('script')
+      script.type = 'module'
+      script.src = MODEL_VIEWER_SRC
+      script.async = true
+      document.head.appendChild(script)
+    }
+  }, [])
+
+  return ready
 }
 
 /** BIM モデル一覧・登録・3D ビューワ */
@@ -43,11 +62,11 @@ export function BimModuleClient() {
   const [title, setTitle] = useState('')
   const [format, setFormat] = useState('glTF')
   const [viewerUrl, setViewerUrl] = useState(BIM_SAMPLE_MODEL_HELMET)
-  const [thumbnailUrl, setThumbnailUrl] = useState(BIM_THUMB_STRUCTURE)
+  const [thumbnailUrl, setThumbnailUrl] = useState(defaultThumbnailForFormat('glTF'))
   const [fileSize, setFileSize] = useState('')
   const [projectId, setProjectId] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [modelViewerReady, setModelViewerReady] = useState(false)
+  const modelViewerReady = useModelViewerReady()
 
   const { data: projectsData } = useQuery(ConstructionProjectsDocument, { fetchPolicy: 'network-only' })
   const { data, loading, error, refetch } = useQuery(BimModelsDocument, {
@@ -65,9 +84,12 @@ export function BimModuleClient() {
   const projects = projectsData?.constructionProjects ?? []
   const models = data?.bimModels ?? []
   const selected = models.find((m) => m.id === selectedId) ?? models[0] ?? null
+  const selectedViewerUrl = selected ? resolveBimViewerUrl(selected.format, selected.viewerUrl) : ''
   const showModelViewer = selected ? canUseModelViewer(selected.format, selected.viewerUrl) : false
   const showIframe = selected ? isEmbeddableViewerPage(selected.viewerUrl) : false
-  const posterUrl = selected ? resolveBimThumbnail(selected.thumbnailUrl) : BIM_THUMB_DEFAULT
+  const selectedThumbKind = selected
+    ? getBimThumbKind(selected.title, selected.format, selected.thumbnailUrl)
+    : 'default'
 
   useEffect(() => {
     if (!projectId && projects.length > 0) setProjectId(projects[0].id)
@@ -85,12 +107,6 @@ export function BimModuleClient() {
 
   return (
     <>
-      <Script
-        type="module"
-        src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
-        strategy="afterInteractive"
-        onReady={() => setModelViewerReady(true)}
-      />
       <div className="page-head">
         <Link href="/saas" className="muted">
           {ui.saasBack}
@@ -110,7 +126,14 @@ export function BimModuleClient() {
             ))}
           </select>
           <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={ui.saasTitle} />
-          <select value={format} onChange={(e) => setFormat(e.target.value)}>
+          <select
+            value={format}
+            onChange={(e) => {
+              const next = e.target.value
+              setFormat(next)
+              setThumbnailUrl(defaultThumbnailForFormat(next))
+            }}
+          >
             <option value="IFC">IFC</option>
             <option value="glTF">glTF</option>
             <option value="Revit">Revit</option>
@@ -156,7 +179,10 @@ export function BimModuleClient() {
                     className={`btn bim-model-item${selected?.id === m.id ? '' : ' btn-ghost'}`}
                     onClick={() => setSelectedId(m.id)}
                   >
-                    <BimThumbnail src={m.thumbnailUrl} className="bim-model-thumb" />
+                    <BimThumbnailArt
+                      kind={getBimThumbKind(m.title, m.format, m.thumbnailUrl)}
+                      className="bim-model-thumb"
+                    />
                     <span className="bim-model-body">
                       <strong>{m.title}</strong>
                       <span className="bim-model-meta">
@@ -181,18 +207,19 @@ export function BimModuleClient() {
               <div className="bim-viewer-frame">
                 {showModelViewer && modelViewerReady ? (
                   createElement('model-viewer', {
-                    key: selected.id,
-                    src: selected.viewerUrl,
-                    poster: posterUrl,
+                    key: `${selected.id}:${selectedViewerUrl}`,
+                    src: selectedViewerUrl,
                     alt: selected.title,
                     'camera-controls': true,
                     'auto-rotate': true,
                     'shadow-intensity': '1',
-                    style: { width: '100%', height: '100%' },
+                    'environment-image': 'neutral',
+                    'exposure': '1',
+                    style: { width: '100%', height: '100%', background: '#1a1f2e' },
                   })
                 ) : showModelViewer ? (
                   <div className="bim-viewer-poster">
-                    <BimThumbnail src={selected.thumbnailUrl} className="bim-viewer-poster-img" />
+                    <BimThumbnailArt kind={selectedThumbKind} className="bim-viewer-poster-img" large />
                     <p className="muted small">{ui.boardLoading}</p>
                   </div>
                 ) : showIframe ? (
@@ -204,7 +231,7 @@ export function BimModuleClient() {
                   />
                 ) : (
                   <div className="bim-viewer-poster">
-                    <BimThumbnail src={selected.thumbnailUrl} className="bim-viewer-poster-img" />
+                    <BimThumbnailArt kind={selectedThumbKind} className="bim-viewer-poster-img" large />
                     <p className="muted small bim-viewer-poster-hint">{ui.bimViewerPosterHint}</p>
                   </div>
                 )}

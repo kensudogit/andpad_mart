@@ -1717,10 +1717,10 @@ html, body {
   flex-shrink: 0;
   width: 72px;
   height: 54px;
-  object-fit: cover;
   border-radius: 6px;
   background: #1a1f2e;
   border: 1px solid var(--border);
+  display: block;
 }
 
 .bim-model-body {
@@ -1777,11 +1777,12 @@ html, body {
 }
 
 .bim-viewer-poster-img {
-  max-width: min(100%, 420px);
+  width: min(100%, 420px);
+  height: auto;
   max-height: 320px;
-  object-fit: contain;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
+  display: block;
 }
 
 .bim-viewer-poster-hint {

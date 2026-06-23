@@ -1,31 +1,62 @@
-/** BIM デモ用アセット（外部 CDN 障害時も表示できるよう自前 SVG を優先）。 */
+/** BIM サムネイル種別（DB / タイトル / フォーマットから解決）。 */
+export type BimThumbKind = 'default' | 'structure' | 'equipment' | 'renovation'
+
 export const BIM_SAMPLE_MODEL_HELMET =
   'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb'
 
 export const BIM_SAMPLE_MODEL_ASTRONAUT =
   'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/Astronaut/glTF-Binary/Astronaut.glb'
 
-export const BIM_THUMB_DEFAULT = '/bim/thumbs/default.svg'
-export const BIM_THUMB_STRUCTURE = '/bim/thumbs/structure.svg'
-export const BIM_THUMB_EQUIPMENT = '/bim/thumbs/equipment.svg'
-export const BIM_THUMB_RENOVATION = '/bim/thumbs/renovation.svg'
-
-export function resolveBimThumbnail(url?: string | null) {
-  if (!url || url.trim() === '') return BIM_THUMB_DEFAULT
-  if (url.startsWith('/')) return url
-  if (url.includes('modelviewer.dev') || url.includes('unsplash.com')) return BIM_THUMB_DEFAULT
-  return url
+export function getBimThumbKind(
+  title?: string | null,
+  format?: string | null,
+  thumbnailUrl?: string | null,
+): BimThumbKind {
+  const t = title ?? ''
+  const u = (thumbnailUrl ?? '').toLowerCase()
+  if (t.includes('設備') || u.includes('equipment')) return 'equipment'
+  if (t.includes('本館') || t.includes('構造') || u.includes('structure')) return 'structure'
+  if (t.includes('改修') || u.includes('renovation')) return 'renovation'
+  const fmt = (format ?? '').toLowerCase()
+  if (fmt === 'ifc' || fmt === 'revit') return 'equipment'
+  if (fmt.includes('gltf') || fmt === 'glb') return 'structure'
+  return 'default'
 }
 
 export function canUseModelViewer(format?: string | null, viewerUrl?: string | null) {
-  const fmt = (format ?? '').toLowerCase()
-  const url = (viewerUrl ?? '').toLowerCase()
+  const resolved = resolveBimViewerUrl(format, viewerUrl)
+  const url = resolved.toLowerCase()
   if (url.endsWith('.glb') || url.endsWith('.gltf')) return true
+  const fmt = (format ?? '').toLowerCase()
   return fmt.includes('gltf') || fmt === 'glb'
+}
+
+export function resolveBimViewerUrl(format?: string | null, viewerUrl?: string | null) {
+  const url = (viewerUrl ?? '').trim()
+  if (url && !url.includes('modelviewer.dev') && (url.endsWith('.glb') || url.endsWith('.gltf'))) {
+    return url
+  }
+  const fmt = (format ?? '').toLowerCase()
+  if (fmt.includes('gltf') || fmt === 'glb') {
+    if (url.includes('Astronaut')) return BIM_SAMPLE_MODEL_ASTRONAUT
+    return BIM_SAMPLE_MODEL_HELMET
+  }
+  return url
 }
 
 export function isEmbeddableViewerPage(viewerUrl?: string | null) {
   const url = (viewerUrl ?? '').trim().toLowerCase()
   if (!url.startsWith('http')) return false
   return !url.endsWith('.glb') && !url.endsWith('.gltf')
+}
+
+export function defaultThumbnailPath(kind: BimThumbKind) {
+  return `/bim/thumbs/${kind === 'default' ? 'default' : kind}.svg`
+}
+
+export function defaultThumbnailForFormat(format: string) {
+  const fmt = format.toLowerCase()
+  if (fmt === 'ifc' || fmt === 'revit') return defaultThumbnailPath('equipment')
+  if (fmt.includes('gltf') || fmt === 'glb') return defaultThumbnailPath('structure')
+  return defaultThumbnailPath('default')
 }
