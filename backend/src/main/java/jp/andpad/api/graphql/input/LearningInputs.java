@@ -18,5 +18,11 @@ public final class LearningInputs {
             String name, String provider, String endpointUrl, String apiKeyHint) {}
 
     public record CreateBimModelInput(
-            String projectId, String title, String format, String viewerUrl, Double fileSizeMb, String uploadedBy) {}
+            String projectId,
+            String title,
+            String format,
+            String viewerUrl,
+            String thumbnailUrl,
+            Double fileSizeMb,
+            String uploadedBy) {}
 }

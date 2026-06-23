@@ -725,6 +725,7 @@ type BimModel {
   title: String!
   format: String!
   viewerUrl: String!
+  thumbnailUrl: String!
   fileSizeMb: Float
   status: String!
   uploadedBy: String!
@@ -743,6 +744,7 @@ input CreateBimModelInput {
   title: String!
   format: String
   viewerUrl: String
+  thumbnailUrl: String
   fileSizeMb: Float
   uploadedBy: String
 }

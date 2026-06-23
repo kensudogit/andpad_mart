@@ -222,7 +222,7 @@ public class ExtendedRepository {
         StringBuilder sql = new StringBuilder(
                 """
                 SELECT b.id, b.project_id, p.name AS project_name, b.title, b.format, b.viewer_url,
-                       b.file_size_mb, b.status, b.uploaded_by, b.created_at
+                       b.thumbnail_url, b.file_size_mb, b.status, b.uploaded_by, b.created_at
                 FROM bim_models b
                 JOIN construction_projects p ON p.id = b.project_id
                 WHERE b.org_id = ?
@@ -242,7 +242,7 @@ public class ExtendedRepository {
             return jdbc.queryForObject(
                     """
                     SELECT b.id, b.project_id, p.name AS project_name, b.title, b.format, b.viewer_url,
-                           b.file_size_mb, b.status, b.uploaded_by, b.created_at
+                           b.thumbnail_url, b.file_size_mb, b.status, b.uploaded_by, b.created_at
                     FROM bim_models b
                     JOIN construction_projects p ON p.id = b.project_id
                     WHERE b.id = ? AND b.org_id = ?
@@ -262,6 +262,9 @@ public class ExtendedRepository {
         String viewerUrl = input.viewerUrl() == null || input.viewerUrl().isBlank()
                 ? "https://demo.bimdata.io/viewer"
                 : input.viewerUrl();
+        String thumbnailUrl = input.thumbnailUrl() == null || input.thumbnailUrl().isBlank()
+                ? "https://modelviewer.dev/shared-assets/models/Astronaut.webp"
+                : input.thumbnailUrl();
         String projectName = jdbc.queryForObject(
                 "SELECT name FROM construction_projects WHERE id = ? AND org_id = ?",
                 String.class,
@@ -269,8 +272,8 @@ public class ExtendedRepository {
                 orgId);
         jdbc.update(
                 """
-                INSERT INTO bim_models (id, org_id, project_id, title, format, viewer_url, file_size_mb, status, uploaded_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'READY', ?)
+                INSERT INTO bim_models (id, org_id, project_id, title, format, viewer_url, thumbnail_url, file_size_mb, status, uploaded_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'READY', ?)
                 """,
                 id,
                 orgId,
@@ -278,6 +281,7 @@ public class ExtendedRepository {
                 input.title(),
                 format,
                 viewerUrl,
+                thumbnailUrl,
                 input.fileSizeMb(),
                 input.uploadedBy() == null ? "" : input.uploadedBy());
         return new BimModel(
@@ -287,6 +291,7 @@ public class ExtendedRepository {
                 input.title(),
                 format,
                 viewerUrl,
+                thumbnailUrl,
                 input.fileSizeMb(),
                 "READY",
                 input.uploadedBy() == null ? "" : input.uploadedBy(),
@@ -326,6 +331,7 @@ public class ExtendedRepository {
                 rs.getString("title"),
                 rs.getString("format"),
                 rs.getString("viewer_url"),
+                rs.getString("thumbnail_url"),
                 size,
                 rs.getString("status"),
                 rs.getString("uploaded_by"),

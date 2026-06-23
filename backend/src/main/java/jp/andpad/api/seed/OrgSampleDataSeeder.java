@@ -212,13 +212,17 @@ public class OrgSampleDataSeeder {
                 orgId);
         jdbc.update(
                 """
-                INSERT INTO bim_models (id, org_id, project_id, title, format, viewer_url, file_size_mb, status, uploaded_by)
+                INSERT INTO bim_models (id, org_id, project_id, title, format, viewer_url, thumbnail_url, file_size_mb, status, uploaded_by)
                 VALUES
                   (?, ?, ?, '本館構造BIMモデル v2', 'glTF',
-                          'https://modelviewer.dev/shared-assets/models/Astronaut.glb', 128.5, 'READY', '山田 太郎'),
+                          'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
+                          'https://modelviewer.dev/shared-assets/models/Astronaut.webp', 128.5, 'READY', '山田 太郎'),
                   (?, ?, ?, '改修計画BIM', 'glTF',
-                          'https://modelviewer.dev/shared-assets/models/Astronaut.glb', 42.0, 'PROCESSING', '佐藤 花子')
-                ON CONFLICT (id) DO NOTHING
+                          'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
+                          'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=320&h=180&fit=crop', 42.0, 'PROCESSING', '佐藤 花子')
+                ON CONFLICT (id) DO UPDATE SET
+                    thumbnail_url = EXCLUDED.thumbnail_url,
+                    viewer_url = EXCLUDED.viewer_url
                 """,
                 extId(orgId, "bim1"),
                 orgId,

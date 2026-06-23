@@ -44,6 +44,7 @@ public final class ExtendedTypes {
             String title,
             String format,
             String viewerUrl,
+            String thumbnailUrl,
             Double fileSizeMb,
             String status,
             String uploadedBy,

@@ -75,6 +75,7 @@ fragment BimModelFields on BimModel {
   title
   format
   viewerUrl
+  thumbnailUrl
   fileSizeMb
   status
   uploadedBy

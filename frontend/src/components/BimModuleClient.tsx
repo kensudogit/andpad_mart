@@ -16,12 +16,14 @@ import { graphQLErrorHint, isAuthRequiredGraphQLError } from '@/lib/graphql-erro
 import { ui } from '@/lib/ui'
 
 const DEFAULT_VIEWER = 'https://modelviewer.dev/shared-assets/models/Astronaut.glb'
+const DEFAULT_THUMBNAIL = 'https://modelviewer.dev/shared-assets/models/Astronaut.webp'
 
 /** BIM モデル一覧・登録・3D ビューワ */
 export function BimModuleClient() {
   const [title, setTitle] = useState('')
   const [format, setFormat] = useState('glTF')
   const [viewerUrl, setViewerUrl] = useState(DEFAULT_VIEWER)
+  const [thumbnailUrl, setThumbnailUrl] = useState(DEFAULT_THUMBNAIL)
   const [fileSize, setFileSize] = useState('')
   const [projectId, setProjectId] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -91,6 +93,7 @@ export function BimModuleClient() {
             <option value="Revit">Revit</option>
           </select>
           <input value={viewerUrl} onChange={(e) => setViewerUrl(e.target.value)} placeholder={ui.bimViewerUrl} />
+          <input value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} placeholder={ui.bimThumbnailUrl} />
           <input type="number" value={fileSize} onChange={(e) => setFileSize(e.target.value)} placeholder={ui.bimFileSize} />
           <button
             type="button"
@@ -104,6 +107,7 @@ export function BimModuleClient() {
                     title,
                     format,
                     viewerUrl,
+                    thumbnailUrl: thumbnailUrl || undefined,
                     fileSizeMb: fileSize ? parseFloat(fileSize) : undefined,
                   },
                 },
@@ -129,10 +133,15 @@ export function BimModuleClient() {
                     className={`btn bim-model-item${selected?.id === m.id ? '' : ' btn-ghost'}`}
                     onClick={() => setSelectedId(m.id)}
                   >
-                    <strong>{m.title}</strong>
-                    <span className="bim-model-meta">
-                      {m.format} · {m.projectName}
-                      {m.fileSizeMb != null ? ` · ${m.fileSizeMb}MB` : ''}
+                    {m.thumbnailUrl ? (
+                      <img src={m.thumbnailUrl} alt="" className="bim-model-thumb" loading="lazy" />
+                    ) : null}
+                    <span className="bim-model-body">
+                      <strong>{m.title}</strong>
+                      <span className="bim-model-meta">
+                        {m.format} · {m.projectName}
+                        {m.fileSizeMb != null ? ` · ${m.fileSizeMb}MB` : ''}
+                      </span>
                     </span>
                   </button>
                 </li>
@@ -162,6 +171,7 @@ export function BimModuleClient() {
                 {isGltf ? (
                   createElement('model-viewer', {
                     src: selected.viewerUrl,
+                    poster: selected.thumbnailUrl || undefined,
                     alt: selected.title,
                     'camera-controls': true,
                     'auto-rotate': true,
