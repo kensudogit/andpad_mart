@@ -35,9 +35,11 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
         signal: AbortSignal.timeout(LOGIN_TIMEOUT_MS),
       })
-      const body = (await res.json()) as { token?: string; error?: string }
+      const body = (await res.json()) as { token?: string; error?: string; hint?: string }
       if (!res.ok) {
-        throw new Error(body.error ?? 'Login failed')
+        const parts = [body.error ?? 'Login failed']
+        if (body.hint) parts.push(body.hint)
+        throw new Error(parts.join(' — '))
       }
       if (body.token) {
         setAuthToken(body.token)

@@ -1,7 +1,10 @@
 /**
  * サーバー側プロキシ用 fetch（タイムアウト付き）。
- * auth / graphql ルートから Go API へ転送する際に使用。
+ * auth / graphql ルートから Java API へ転送する際に使用。
  */
+import { dbConfigured } from '@/lib/status-check'
+import { isRailway, unifiedDeployActive } from '@/lib/resolve-api-url'
+
 export const PROXY_TIMEOUT_DEFAULT_MS = 15_000
 /** OpenAI 連携 mutation（チャット・RAG・AI Board）向け */
 export const PROXY_TIMEOUT_GRAPHQL_POST_MS = 120_000
@@ -42,6 +45,32 @@ export async function proxyUpstreamResponse(upstream: Response): Promise<Respons
   return new Response(text, { status: upstream.status, headers: outHeaders })
 }
 
+/** 統合デプロイで API 未到達時の診断メッセージ */
+function proxyConnectionHint(): string | undefined {
+  if (!unifiedDeployActive()) return undefined
+
+  const status = process.env.UNIFIED_API_STATUS?.trim()
+  if (status === 'missing_database_url' || !dbConfigured()) {
+    return (
+      'DATABASE_URL が未設定のため Java API が起動していません。' +
+      ' Railway → andpad_mart サービス → Variables → Reference → Postgres → DATABASE_URL を追加して Redeploy してください。'
+    )
+  }
+  if (status === 'unresolved_database_url') {
+    return 'DATABASE_URL の参照が未解決です（${{...}}）。変数参照を修正して Redeploy してください。'
+  }
+  if (status === 'api_exited') {
+    return 'Java API が起動中に終了しました。Railway の Deploy ログで [unified] ERROR を確認してください。'
+  }
+  if (isRailway()) {
+    return (
+      'Java API (127.0.0.1:8081) に接続できません。' +
+      ' /status で DATABASE_URL · JWT_SECRET を確認し、Deploy ログで [unified] Java API ready を探してください。'
+    )
+  }
+  return undefined
+}
+
 /** 候補ベース URL を順に試し、接続失敗時のみ次へ */
 export async function proxyToApiBases(
   bases: string[],
@@ -59,5 +88,12 @@ export async function proxyToApiBases(
       failures.push(`${base}: ${err instanceof Error ? err.message : String(err)}`)
     }
   }
-  return Response.json({ error: `Cannot reach API (${failures.join('; ')})` }, { status: 502 })
+  const hint = proxyConnectionHint()
+  return Response.json(
+    {
+      error: `Cannot reach API (${failures.join('; ')})`,
+      hint,
+    },
+    { status: 502 },
+  )
 }

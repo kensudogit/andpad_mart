@@ -56,6 +56,20 @@ if [ -z "${DATABASE_URL:-}" ] && [ -n "${DATABASE_PRIVATE_URL:-}" ]; then
   fi
 fi
 
+# Railway Postgres の PG* 変数だけが参照されている場合に DATABASE_URL を組み立てる
+if [ -z "${DATABASE_URL:-}" ] || ref_unresolved "${DATABASE_URL}"; then
+  if [ -n "${PGHOST:-}" ] && ! ref_unresolved "${PGHOST}" && [ -n "${PGUSER:-}" ] && ! ref_unresolved "${PGUSER}"; then
+    _pg_port="${PGPORT:-5432}"
+    _pg_db="${PGDATABASE:-railway}"
+    if [ -n "${PGPASSWORD:-}" ] && ! ref_unresolved "${PGPASSWORD}"; then
+      export DATABASE_URL="postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${_pg_port}/${_pg_db}"
+    else
+      export DATABASE_URL="postgresql://${PGUSER}@${PGHOST}:${_pg_port}/${_pg_db}"
+    fi
+    echo "[unified] built DATABASE_URL from PG* variables"
+  fi
+fi
+
 echo "[unified] web=${WEB_PORT} api=${API_PORT}"
 echo "[unified] DATABASE_URL=$(env_state "${DATABASE_URL:-}")"
 echo "[unified] DATABASE_PRIVATE_URL=$(env_state "${DATABASE_PRIVATE_URL:-}")"
@@ -75,9 +89,11 @@ elif [ -n "${PGHOST:-}" ] && ! ref_unresolved "${PGHOST}"; then
 fi
 
 if [ "$db_configured" -eq 0 ]; then
+  export UNIFIED_API_STATUS=missing_database_url
   echo "[unified] WARNING: DATABASE_URL is not configured — API will not start"
   echo "[unified]   andpad_mart service → Variables → Reference → Postgres → DATABASE_URL"
 elif ref_unresolved "${DATABASE_URL:-}"; then
+  export UNIFIED_API_STATUS=unresolved_database_url
   echo "[unified] WARNING: DATABASE_URL looks like an unresolved Railway reference (\${{...}})"
   echo "[unified]   Fix the variable reference on the app service, then Redeploy"
 else
@@ -113,24 +129,29 @@ else
   API_PID=$!
   echo "[unified] Java API pid=${API_PID}"
 
-  (
-    i=0
-    while [ "$i" -lt 360 ]; do
-      if curl -sf "http://127.0.0.1:${API_PORT}/health" >/dev/null 2>&1; then
-        echo "[unified] Java API ready on 127.0.0.1:${API_PORT}"
-        exit 0
-      fi
-      if ! kill -0 "$API_PID" 2>/dev/null; then
-        echo "[unified] ERROR: Java API exited before becoming ready"
-        tail -n 80 "${API_LOG}" 2>/dev/null || true
-        exit 1
-      fi
-      i=$((i + 1))
-      sleep 0.5
-    done
-    echo "[unified] WARNING: Java API not ready after 180s (login/GraphQL may return 502 until ready)"
+  echo "[unified] waiting for Java API on 127.0.0.1:${API_PORT}..."
+  i=0
+  api_ready=0
+  while [ "$i" -lt 360 ]; do
+    if curl -sf "http://127.0.0.1:${API_PORT}/health" >/dev/null 2>&1; then
+      echo "[unified] Java API ready on 127.0.0.1:${API_PORT}"
+      api_ready=1
+      break
+    fi
+    if ! kill -0 "$API_PID" 2>/dev/null; then
+      export UNIFIED_API_STATUS=api_exited
+      echo "[unified] ERROR: Java API exited before becoming ready"
+      tail -n 80 "${API_LOG}" 2>/dev/null || true
+      break
+    fi
+    i=$((i + 1))
+    sleep 0.5
+  done
+  if [ "$api_ready" -eq 0 ] && [ "${UNIFIED_API_STATUS:-}" != "api_exited" ]; then
+    export UNIFIED_API_STATUS=api_timeout
+    echo "[unified] WARNING: Java API not ready after 180s"
     tail -n 40 "${API_LOG}" 2>/dev/null || true
-  ) &
+  fi
 fi
 
 echo "[unified] starting Next.js on ${WEB_PORT} (Railway healthcheck)"

@@ -50,7 +50,8 @@ function jwtSecretWarning(): string | undefined {
   return undefined
 }
 
-function dbConfigured(): boolean {
+/** Next.js プロセスから DB 接続設定の有無を判定（Java API 未起動時の診断用） */
+export function dbConfigured(): boolean {
   for (const key of ['DATABASE_URL', 'DATABASE_PRIVATE_URL', 'PGHOST'] as const) {
     const v = process.env[key]?.trim()
     if (v && !v.includes('${{')) return true
