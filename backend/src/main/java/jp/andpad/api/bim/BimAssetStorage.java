@@ -25,17 +25,20 @@ public class BimAssetStorage {
     public static final String KIND_THUMBNAIL = "THUMBNAIL";
     public static final String KIND_MODEL = "MODEL";
 
+    private static final Set<String> ALLOWED_MODEL_TYPES = Set.of(
+            "model/gltf-binary",
+            "model/gltf+json",
+            "model/gltf",
+            "application/octet-stream",
+            "application/json",
+            "text/plain");
+
     private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of(
             "image/jpeg",
             "image/png",
             "image/webp",
             "image/gif",
             "image/svg+xml");
-
-    private static final Set<String> ALLOWED_MODEL_TYPES = Set.of(
-            "model/gltf-binary",
-            "model/gltf+json",
-            "application/octet-stream");
 
     private final BimFileRepository bimFileRepository;
     private final Path uploadRoot;
@@ -60,11 +63,11 @@ public class BimAssetStorage {
     }
 
     public StoredBimAsset storeImage(String orgId, String originalFileName, String contentType, byte[] bytes) {
-        return store(orgId, originalFileName, contentType, bytes, KIND_THUMBNAIL, maxImageBytes, ALLOWED_IMAGE_TYPES);
+        return store(orgId, originalFileName, contentType, bytes, KIND_THUMBNAIL, maxImageBytes);
     }
 
     public StoredBimAsset storeModel(String orgId, String originalFileName, String contentType, byte[] bytes) {
-        return store(orgId, originalFileName, contentType, bytes, KIND_MODEL, maxModelBytes, ALLOWED_MODEL_TYPES);
+        return store(orgId, originalFileName, contentType, bytes, KIND_MODEL, maxModelBytes);
     }
 
     private StoredBimAsset store(
@@ -73,8 +76,7 @@ public class BimAssetStorage {
             String contentType,
             byte[] bytes,
             String fileKind,
-            long maxBytes,
-            Set<String> allowedTypes) {
+            long maxBytes) {
         if (orgId == null || orgId.isBlank()) {
             throw new IllegalArgumentException("orgId is required");
         }
@@ -85,8 +87,16 @@ public class BimAssetStorage {
             throw new IllegalArgumentException("file exceeds max size (" + maxBytes + " bytes)");
         }
 
-        String normalizedType = normalizeContentType(contentType, originalFileName, fileKind);
-        if (!allowedTypes.contains(normalizedType) && !isAllowedByExtension(originalFileName, fileKind)) {
+        String normalizedType = normalizeContentType(contentType, originalFileName, fileKind, bytes);
+        if (!isAllowedContent(normalizedType, originalFileName, fileKind, bytes)) {
+            if (KIND_MODEL.equals(fileKind)) {
+                throw new IllegalArgumentException(
+                        "unsupported 3D model type: " + normalizedType + " (use .glb or .gltf)");
+            }
+            if (isModelContentType(normalizedType) || looksLikeModelBytes(bytes)) {
+                throw new IllegalArgumentException(
+                        "GLB/GLTF files must be uploaded with the 3D model button, not thumbnail");
+            }
             throw new IllegalArgumentException("unsupported file type: " + normalizedType);
         }
 
@@ -150,6 +160,46 @@ public class BimAssetStorage {
         return file;
     }
 
+    private static boolean isAllowedContent(
+            String normalizedType, String originalFileName, String fileKind, byte[] bytes) {
+        if (KIND_MODEL.equals(fileKind)) {
+            if (ALLOWED_MODEL_TYPES.contains(normalizedType)) {
+                return true;
+            }
+            if (isModelContentType(normalizedType)) {
+                return true;
+            }
+            if (isAllowedByExtension(originalFileName, fileKind)) {
+                return true;
+            }
+            return looksLikeModelBytes(bytes);
+        }
+        if (ALLOWED_IMAGE_TYPES.contains(normalizedType)) {
+            return true;
+        }
+        return isAllowedByExtension(originalFileName, fileKind);
+    }
+
+    private static boolean isModelContentType(String normalizedType) {
+        return normalizedType.startsWith("model/gltf");
+    }
+
+    private static boolean looksLikeModelBytes(byte[] bytes) {
+        if (bytes == null || bytes.length < 4) {
+            return false;
+        }
+        if (bytes[0] == 'g' && bytes[1] == 'l' && bytes[2] == 'T' && bytes[3] == 'F') {
+            return true;
+        }
+        for (int i = 0; i < Math.min(bytes.length, 256); i++) {
+            byte b = bytes[i];
+            if (!Character.isWhitespace(b)) {
+                return b == '{';
+            }
+        }
+        return false;
+    }
+
     private static boolean isAllowedByExtension(String originalFileName, String fileKind) {
         String lower = originalFileName == null ? "" : originalFileName.toLowerCase(Locale.ROOT);
         if (KIND_MODEL.equals(fileKind)) {
@@ -175,16 +225,27 @@ public class BimAssetStorage {
         return base.replaceAll("[^a-zA-Z0-9._\\-]", "_");
     }
 
-    private static String normalizeContentType(String contentType, String originalFileName, String fileKind) {
+    private static String normalizeContentType(
+            String contentType, String originalFileName, String fileKind, byte[] bytes) {
         if (contentType != null && !contentType.isBlank()) {
             String normalized = contentType.split(";")[0].trim().toLowerCase(Locale.ROOT);
-            if (!"application/octet-stream".equals(normalized)) {
+            if (!"application/octet-stream".equals(normalized) && !"text/plain".equals(normalized)) {
                 return normalized;
             }
         }
         String lower = originalFileName == null ? "" : originalFileName.toLowerCase(Locale.ROOT);
         if (lower.endsWith(".glb")) return "model/gltf-binary";
         if (lower.endsWith(".gltf")) return "model/gltf+json";
+        if (KIND_MODEL.equals(fileKind) && looksLikeModelBytes(bytes)) {
+            if (bytes.length >= 4
+                    && bytes[0] == 'g'
+                    && bytes[1] == 'l'
+                    && bytes[2] == 'T'
+                    && bytes[3] == 'F') {
+                return "model/gltf-binary";
+            }
+            return "model/gltf+json";
+        }
         if (lower.endsWith(".png")) return "image/png";
         if (lower.endsWith(".webp")) return "image/webp";
         if (lower.endsWith(".gif")) return "image/gif";
@@ -194,6 +255,9 @@ public class BimAssetStorage {
     }
 
     private static String extensionFor(String contentType, String originalFileName, String fileKind) {
+        if (contentType.startsWith("model/gltf") && !"model/gltf-binary".equals(contentType)) {
+            return ".gltf";
+        }
         return switch (contentType) {
             case "model/gltf-binary" -> ".glb";
             case "model/gltf+json" -> ".gltf";

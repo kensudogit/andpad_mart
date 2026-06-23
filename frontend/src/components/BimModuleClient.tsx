@@ -104,6 +104,10 @@ export function BimModuleClient() {
   }, [projectId, projects, selectedId, models])
 
   async function handleThumbnailUpload(file: File, targetModelId?: string) {
+    if (file.name.toLowerCase().endsWith('.glb') || file.name.toLowerCase().endsWith('.gltf')) {
+      setUploadMessage('GLB/GLTF は「3Dモデルファイルをアップロード」から登録してください')
+      return
+    }
     setUploadBusy(true)
     setUploadMessage(null)
     try {
@@ -122,6 +126,11 @@ export function BimModuleClient() {
   }
 
   async function handleModelUpload(file: File, targetModelId?: string) {
+    const lower = file.name.toLowerCase()
+    if (!lower.endsWith('.glb') && !lower.endsWith('.gltf')) {
+      setUploadMessage('3Dモデルは .glb または .gltf ファイルを選択してください')
+      return
+    }
     setUploadBusy(true)
     setUploadMessage(null)
     try {
