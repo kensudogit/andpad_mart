@@ -1,11 +1,19 @@
 'use client'
 
-import { createElement, useEffect, useRef, useState } from 'react'
+import { createElement, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { resolveBimModelObjectUrl } from '@/lib/bim-model-fetch'
 import { ui } from '@/lib/ui'
 
 export const MODEL_VIEWER_SCRIPT =
   'https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js'
+
+const DRACO_DECODER_PATH = 'https://www.gstatic.com/draco/versioned/decoders/1.5.7/'
+const KTX2_TRANSCODER_PATH =
+  'https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/lib/basis/'
+
+type ModelViewerElement = HTMLElement & {
+  loaded?: Promise<void>
+}
 
 export function useModelViewerReady() {
   const [ready, setReady] = useState(false)
@@ -43,9 +51,19 @@ type BimModelViewerProps = {
   alt: string
 }
 
+function modelViewerErrorMessage(event: Event): string {
+  const detail = (event as CustomEvent<{ message?: string }>).detail
+  const message = detail?.message?.trim()
+  if (!message) return ui.bimViewerLoadError
+  if (message.includes('DRACO') || message.includes('draco')) {
+    return 'Draco 圧縮モデルの読み込みに失敗しました。GLB を再エクスポートしてお試しください'
+  }
+  return message
+}
+
 /** Google model-viewer で glTF / GLB を表示（認証付き API パス対応） */
 export function BimModelViewer({ src, alt }: BimModelViewerProps) {
-  const viewerRef = useRef<HTMLElement | null>(null)
+  const viewerRef = useRef<ModelViewerElement | null>(null)
   const revokeRef = useRef<(() => void) | null>(null)
   const activeRef = useRef(true)
   const [displaySrc, setDisplaySrc] = useState<string | null>(null)
@@ -85,24 +103,35 @@ export function BimModelViewer({ src, alt }: BimModelViewerProps) {
     }
   }, [src])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = viewerRef.current
     if (!el || !displaySrc) return
 
+    let cancelled = false
+
     const onError = (event: Event) => {
-      if (!activeRef.current) return
-      const detail = (event as CustomEvent<{ message?: string }>).detail?.message
-      setError(detail?.trim() || ui.bimViewerLoadError)
-    }
-    const onLoad = () => {
-      if (activeRef.current) setError(null)
+      if (cancelled || !activeRef.current) return
+      setError(modelViewerErrorMessage(event))
     }
 
     el.addEventListener('error', onError)
-    el.addEventListener('load', onLoad)
+
+    if (el.loaded) {
+      void el.loaded
+        .then(() => {
+          if (!cancelled && activeRef.current) setError(null)
+        })
+        .catch((err: unknown) => {
+          if (!cancelled && activeRef.current) {
+            const message = err instanceof Error ? err.message : ui.bimViewerLoadError
+            setError(message)
+          }
+        })
+    }
+
     return () => {
+      cancelled = true
       el.removeEventListener('error', onError)
-      el.removeEventListener('load', onLoad)
     }
   }, [displaySrc])
 
@@ -141,6 +170,9 @@ export function BimModelViewer({ src, alt }: BimModelViewerProps) {
     'shadow-intensity': '1',
     'exposure': '1',
     'interaction-prompt': 'none',
+    'draco-decoder-path': DRACO_DECODER_PATH,
+    'ktx2-transcoder-path': KTX2_TRANSCODER_PATH,
+    'environment-image': 'legacy',
     style: {
       width: '100%',
       height: '100%',

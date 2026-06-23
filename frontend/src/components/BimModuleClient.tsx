@@ -14,7 +14,7 @@ import {
   CreateBimModelDocument,
 } from '@/lib/generated/graphql'
 import {
-  BIM_SAMPLE_MODEL_LOCAL_GLB,
+  BIM_SAMPLE_MODEL_LOCAL_GLTF_EMBEDDED,
   canUseModelViewer,
   defaultThumbnailForFormat,
   getBimThumbKind,
@@ -30,7 +30,7 @@ import { ui } from '@/lib/ui'
 export function BimModuleClient() {
   const [title, setTitle] = useState('')
   const [format, setFormat] = useState('glTF')
-  const [viewerUrl, setViewerUrl] = useState(BIM_SAMPLE_MODEL_LOCAL_GLB)
+  const [viewerUrl, setViewerUrl] = useState(BIM_SAMPLE_MODEL_LOCAL_GLTF_EMBEDDED)
   const [thumbnailUrl, setThumbnailUrl] = useState(defaultThumbnailForFormat('glTF'))
   const [fileSize, setFileSize] = useState('')
   const [projectId, setProjectId] = useState('')

@@ -50,7 +50,7 @@ export function resolveBimViewerUrl(format?: string | null, viewerUrl?: string |
   const fmt = (format ?? '').toLowerCase()
   if (fmt.includes('gltf') || fmt === 'glb') {
     if (url.includes('Astronaut')) return BIM_SAMPLE_MODEL_ASTRONAUT
-    if (url.includes('andpad-sample') || !url) return BIM_SAMPLE_MODEL_LOCAL_GLB
+    if (url.includes('andpad-sample') || !url) return BIM_SAMPLE_MODEL_LOCAL_GLTF_EMBEDDED
     return BIM_SAMPLE_MODEL_HELMET
   }
   return url

@@ -107,7 +107,7 @@ public class BimAssetStorage {
             assertGltfSelfContained(bytes);
         }
 
-        String extension = extensionFor(normalizedType, originalFileName, fileKind);
+        String extension = extensionFromBytes(bytes, normalizedType, originalFileName, fileKind);
         String storedName = UUID.randomUUID() + extension;
         Path orgDir = uploadRoot.resolve(sanitizeOrgId(orgId));
         Path target = orgDir.resolve(storedName).normalize();
@@ -296,6 +296,23 @@ public class BimAssetStorage {
         if (lower.endsWith(".svg")) return "image/svg+xml";
         if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
         return KIND_MODEL.equals(fileKind) ? "application/octet-stream" : "application/octet-stream";
+    }
+
+    private static boolean isGlbBytes(byte[] bytes) {
+        return bytes != null
+                && bytes.length >= 4
+                && bytes[0] == 'g'
+                && bytes[1] == 'l'
+                && bytes[2] == 'T'
+                && bytes[3] == 'F';
+    }
+
+    private static String extensionFromBytes(
+            byte[] bytes, String normalizedType, String originalFileName, String fileKind) {
+        if (KIND_MODEL.equals(fileKind) && isGlbBytes(bytes)) {
+            return ".glb";
+        }
+        return extensionFor(normalizedType, originalFileName, fileKind);
     }
 
     private static String extensionFor(String contentType, String originalFileName, String fileKind) {

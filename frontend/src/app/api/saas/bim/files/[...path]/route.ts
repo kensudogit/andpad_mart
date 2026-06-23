@@ -12,6 +12,10 @@ function forwardAuthHeaders(request: Request, headers: Headers) {
   if (cookie) headers.set('cookie', cookie)
   const authorization = request.headers.get('authorization')
   if (authorization) headers.set('authorization', authorization)
+  const accessToken = new URL(request.url).searchParams.get('access_token')
+  if (accessToken && !headers.has('authorization')) {
+    headers.set('authorization', `Bearer ${accessToken}`)
+  }
 }
 
 type Ctx = { params: Promise<{ path: string[] }> }
