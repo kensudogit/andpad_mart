@@ -113,6 +113,7 @@ const L = {
       body: '本番・ローカル共通。障害切り分けの起点です。',
       items: [
         '/health — Web 生存確認（ok: true, service: andpad-web）',
+        '/ready — 統合デプロイ時の Java API 準備完了確認（未設定時 503）',
         '/status — PostgreSQL connected · GraphQL 接続 OK',
         '統合デプロイでは API (127.0.0.1:8081) 表示は正常（ブラウザは /graphql を使用）',
         '左下「API 接続確認」から同内容を確認',
