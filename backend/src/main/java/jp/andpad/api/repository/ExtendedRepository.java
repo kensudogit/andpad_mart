@@ -260,10 +260,10 @@ public class ExtendedRepository {
         String id = Ids.random("bim_");
         String format = input.format() == null || input.format().isBlank() ? "IFC" : input.format();
         String viewerUrl = input.viewerUrl() == null || input.viewerUrl().isBlank()
-                ? "https://demo.bimdata.io/viewer"
+                ? "https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"
                 : input.viewerUrl();
         String thumbnailUrl = input.thumbnailUrl() == null || input.thumbnailUrl().isBlank()
-                ? "https://modelviewer.dev/shared-assets/models/Astronaut.webp"
+                ? "/bim/thumbs/default.svg"
                 : input.thumbnailUrl();
         String projectName = jdbc.queryForObject(
                 "SELECT name FROM construction_projects WHERE id = ? AND org_id = ?",
