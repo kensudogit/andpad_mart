@@ -1721,6 +1721,39 @@ html, body {
   background: #1a1f2e;
   border: 1px solid var(--border);
   display: block;
+  object-fit: cover;
+}
+
+.bim-upload-btn {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.bim-upload-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.bim-thumb-preview {
+  margin-top: 0.75rem;
+}
+
+.bim-thumb-preview-img {
+  width: 160px;
+  height: 120px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  object-fit: cover;
+  display: block;
+}
+
+.bim-viewer-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.35rem 0 0.5rem;
 }
 
 .bim-model-body {
@@ -1783,6 +1816,7 @@ html, body {
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   display: block;
+  object-fit: contain;
 }
 
 .bim-viewer-poster-hint {

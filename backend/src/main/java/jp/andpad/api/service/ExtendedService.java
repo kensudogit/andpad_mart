@@ -49,6 +49,22 @@ public class ExtendedService {
         return extendedRepository.createBimModel(TenantContext.orgId(), input);
     }
 
+    public BimModel updateBimModelThumbnail(String bimModelId, String thumbnailUrl) {
+        String orgId = TenantContext.orgId();
+        if (orgId == null || orgId.isBlank()) {
+            throw new IllegalStateException("organization context is required");
+        }
+        if (thumbnailUrl == null || thumbnailUrl.isBlank()) {
+            throw new IllegalArgumentException("thumbnailUrl is required");
+        }
+        extendedRepository.updateBimModelThumbnail(orgId, bimModelId, thumbnailUrl.trim());
+        BimModel updated = extendedRepository.getBimModel(orgId, bimModelId);
+        if (updated == null) {
+            throw new IllegalArgumentException("BIM model not found");
+        }
+        return updated;
+    }
+
     public AnalyticsInsight generateAnalyticsInsight(int periodDays) {
         AndpadAnalyticsDashboard dash = andpadAnalytics(periodDays);
         return fallbackConstructionInsight(dash);

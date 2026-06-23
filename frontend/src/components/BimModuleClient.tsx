@@ -6,7 +6,7 @@
 import Link from 'next/link'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { createElement, useEffect, useState } from 'react'
-import { BimThumbnailArt } from '@/components/BimThumbnailArt'
+import { BimModelThumbnail } from '@/components/BimModelThumbnail'
 import {
   BimModelsDocument,
   ConstructionProjectsDocument,
@@ -20,6 +20,7 @@ import {
   isEmbeddableViewerPage,
   resolveBimViewerUrl,
 } from '@/lib/bim-assets'
+import { uploadBimThumbnail } from '@/lib/bim-upload'
 import { graphQLErrorHint, isAuthRequiredGraphQLError } from '@/lib/graphql-errors'
 import { ui } from '@/lib/ui'
 
@@ -66,6 +67,8 @@ export function BimModuleClient() {
   const [fileSize, setFileSize] = useState('')
   const [projectId, setProjectId] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [uploadBusy, setUploadBusy] = useState(false)
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null)
   const modelViewerReady = useModelViewerReady()
 
   const { data: projectsData } = useQuery(ConstructionProjectsDocument, { fetchPolicy: 'network-only' })
@@ -95,6 +98,24 @@ export function BimModuleClient() {
     if (!projectId && projects.length > 0) setProjectId(projects[0].id)
     if (!selectedId && models.length > 0) setSelectedId(models[0].id)
   }, [projectId, projects, selectedId, models])
+
+  async function handleThumbnailUpload(file: File, targetModelId?: string) {
+    setUploadBusy(true)
+    setUploadMessage(null)
+    try {
+      const result = await uploadBimThumbnail(file, targetModelId)
+      if (!targetModelId) {
+        setThumbnailUrl(result.url)
+      }
+      await refetch()
+      setUploadMessage(ui.bimUploadDone)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : ui.bimUploadFailed
+      setUploadMessage(msg)
+    } finally {
+      setUploadBusy(false)
+    }
+  }
 
   if (loading) return <p className="muted">{ui.boardLoading}</p>
 
@@ -140,6 +161,20 @@ export function BimModuleClient() {
           </select>
           <input value={viewerUrl} onChange={(e) => setViewerUrl(e.target.value)} placeholder={ui.bimViewerUrl} />
           <input value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} placeholder={ui.bimThumbnailUrl} />
+          <label className="btn btn-ghost bim-upload-btn">
+            {uploadBusy ? ui.bimUploading : ui.bimUploadThumbnail}
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+              className="bim-upload-input"
+              disabled={uploadBusy}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) void handleThumbnailUpload(file)
+                e.target.value = ''
+              }}
+            />
+          </label>
           <input type="number" value={fileSize} onChange={(e) => setFileSize(e.target.value)} placeholder={ui.bimFileSize} />
           <button
             type="button"
@@ -163,6 +198,18 @@ export function BimModuleClient() {
             {ui.saasCreate}
           </button>
         </div>
+        {uploadMessage ? <p className={`small${uploadMessage === ui.bimUploadDone ? ' text-ok' : ' alert'}`}>{uploadMessage}</p> : null}
+        {thumbnailUrl ? (
+          <div className="bim-thumb-preview">
+            <BimModelThumbnail
+              title={title || ui.bimUploadPreview}
+              format={format}
+              thumbnailUrl={thumbnailUrl}
+              kind={getBimThumbKind(title, format, thumbnailUrl)}
+              className="bim-thumb-preview-img"
+            />
+          </div>
+        ) : null}
       </section>
 
       <div className="bim-layout">
@@ -179,7 +226,10 @@ export function BimModuleClient() {
                     className={`btn bim-model-item${selected?.id === m.id ? '' : ' btn-ghost'}`}
                     onClick={() => setSelectedId(m.id)}
                   >
-                    <BimThumbnailArt
+                    <BimModelThumbnail
+                      title={m.title}
+                      format={m.format}
+                      thumbnailUrl={m.thumbnailUrl}
                       kind={getBimThumbKind(m.title, m.format, m.thumbnailUrl)}
                       className="bim-model-thumb"
                     />
@@ -204,6 +254,22 @@ export function BimModuleClient() {
               <p className="muted small">
                 {selected.title} ({selected.format}) — {selected.uploadedBy}
               </p>
+              <div className="bim-viewer-toolbar">
+                <label className="btn btn-ghost bim-upload-btn">
+                  {uploadBusy ? ui.bimUploading : ui.bimUpdateThumbnail}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                    className="bim-upload-input"
+                    disabled={uploadBusy}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) void handleThumbnailUpload(file, selected.id)
+                      e.target.value = ''
+                    }}
+                  />
+                </label>
+              </div>
               <div className="bim-viewer-frame">
                 {showModelViewer && modelViewerReady ? (
                   createElement('model-viewer', {
@@ -219,7 +285,14 @@ export function BimModuleClient() {
                   })
                 ) : showModelViewer ? (
                   <div className="bim-viewer-poster">
-                    <BimThumbnailArt kind={selectedThumbKind} className="bim-viewer-poster-img" large />
+                    <BimModelThumbnail
+                      title={selected.title}
+                      format={selected.format}
+                      thumbnailUrl={selected.thumbnailUrl}
+                      kind={selectedThumbKind}
+                      className="bim-viewer-poster-img"
+                      large
+                    />
                     <p className="muted small">{ui.boardLoading}</p>
                   </div>
                 ) : showIframe ? (
@@ -231,7 +304,14 @@ export function BimModuleClient() {
                   />
                 ) : (
                   <div className="bim-viewer-poster">
-                    <BimThumbnailArt kind={selectedThumbKind} className="bim-viewer-poster-img" large />
+                    <BimModelThumbnail
+                      title={selected.title}
+                      format={selected.format}
+                      thumbnailUrl={selected.thumbnailUrl}
+                      kind={selectedThumbKind}
+                      className="bim-viewer-poster-img"
+                      large
+                    />
                     <p className="muted small bim-viewer-poster-hint">{ui.bimViewerPosterHint}</p>
                   </div>
                 )}

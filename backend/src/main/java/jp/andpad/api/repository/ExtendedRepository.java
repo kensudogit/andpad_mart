@@ -338,6 +338,17 @@ public class ExtendedRepository {
                 formatTimestamp(rs.getTimestamp("created_at")));
     }
 
+    public void updateBimModelThumbnail(String orgId, String id, String thumbnailUrl) {
+        int updated = jdbc.update(
+                "UPDATE bim_models SET thumbnail_url = ? WHERE id = ? AND org_id = ?",
+                thumbnailUrl,
+                id,
+                orgId);
+        if (updated == 0) {
+            throw new IllegalArgumentException("BIM model not found");
+        }
+    }
+
     private List<MonthlyCostMetric> orgMonthlyCosts(String orgId, int months) {
         LocalDate since = LocalDate.now().minusMonths(months - 1L).withDayOfMonth(1);
         Map<String, Double> byMonth = new HashMap<>();
