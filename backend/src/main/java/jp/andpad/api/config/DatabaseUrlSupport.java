@@ -1,6 +1,7 @@
 package jp.andpad.api.config;
 
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -165,6 +166,6 @@ final class DatabaseUrlSupport {
     }
 
     private static String encode(String value) {
-        return value.replace("@", "%40").replace(":", "%3A");
+        return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
     }
 }

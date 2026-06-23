@@ -1,6 +1,7 @@
 /**
  * サーバー側 API 接続診断（/status ページ・/api/status 共通）。
  */
+import { inferApiStartupHint, readApiStartupLogTail } from '@/lib/api-startup-log'
 import { isRailway, isUnifiedDeploy, resolveApiUrl } from '@/lib/resolve-api-url'
 
 export type SetupStatus = {
@@ -29,6 +30,7 @@ export type StatusPayload = {
   setup?: SetupStatus
   health: { ok?: boolean; service?: string; version?: string }
   error?: string
+  apiStartupLog?: string
 }
 
 function envPresence(key: string): string {
@@ -68,6 +70,8 @@ function localSetupWhenApiDown(): SetupStatus {
   const openaiApiKey = envPresence('OPENAI_API_KEY')
   const railway = isRailway()
   const jwtSecretWarningMsg = jwtSecretWarning()
+  const apiLog = readApiStartupLogTail(30)
+  const apiStatus = process.env.UNIFIED_API_STATUS?.trim()
 
   let hint: string | undefined
   if (!dbConfigured()) {
@@ -78,6 +82,13 @@ function localSetupWhenApiDown(): SetupStatus {
     hint = 'DATABASE_URL reference is unresolved (${{...}}). Fix the variable reference and Redeploy.'
   } else if (jwtSecret === 'empty') {
     hint = 'Set JWT_SECRET (32+ random chars) on the app service, then Redeploy.'
+  } else if (apiStatus === 'api_exited') {
+    hint =
+      inferApiStartupHint(apiLog) ??
+      'Java API exited during startup. See apiStartupLog below or Railway Deploy logs for [unified] ERROR.'
+  } else if (apiStatus === 'api_timeout') {
+    hint =
+      'Java API did not become ready within 180s. Check apiStartupLog below and DATABASE_URL / Postgres status.'
   } else {
     hint =
       'Java API is not responding on 127.0.0.1:8081. Check Railway Deploy logs for ' +
@@ -141,6 +152,8 @@ export async function fetchApiStatus(): Promise<StatusPayload> {
     }
   }
 
+  const apiStartupLog = !apiReachable && unified ? readApiStartupLogTail(40) : undefined
+
   const payload: StatusPayload = {
     service: 'andpad-web',
     ok: apiReachable,
@@ -152,6 +165,7 @@ export async function fetchApiStatus(): Promise<StatusPayload> {
     setup,
     health,
     error,
+    apiStartupLog,
   }
 
   // 統合デプロイでは 127.0.0.1 は正常（ブラウザは /graphql プロキシを使用）

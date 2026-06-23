@@ -54,7 +54,7 @@ export default async function StatusPage() {
             </li>
           ) : null}
         </ul>
-        {s.postgres === false ? (
+        {s.postgres === false || (!s.ok && s.setup) ? (
           <div className="alert" style={{ marginTop: '0.75rem' }}>
             <p>{s.setup?.hint ?? 'PostgreSQL is not connected.'}</p>
             <ul className="metric-list" style={{ marginTop: '0.5rem' }}>
@@ -95,6 +95,24 @@ export default async function StatusPage() {
           </div>
         ) : null}
         {s.error ? <p className="alert">{s.error}</p> : null}
+        {!s.ok && s.apiStartupLog ? (
+          <div className="alert" style={{ marginTop: '0.75rem' }}>
+            <p className="small">
+              <strong>Java API startup log</strong>
+            </p>
+            <pre
+              style={{
+                marginTop: '0.5rem',
+                maxHeight: '16rem',
+                overflow: 'auto',
+                fontSize: '0.75rem',
+                whiteSpace: 'pre-wrap',
+              }}
+            >
+              {s.apiStartupLog}
+            </pre>
+          </div>
+        ) : null}
         {!s.ok ? <p className="muted small">{ui.statusFailHint}</p> : null}
         {s.ok ? (
           <p className="muted small" style={{ marginTop: '0.75rem' }}>

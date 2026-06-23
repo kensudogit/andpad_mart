@@ -3,6 +3,7 @@
  * auth / graphql ルートから Java API へ転送する際に使用。
  */
 import { dbConfigured } from '@/lib/status-check'
+import { inferApiStartupHint, readApiStartupLogTail } from '@/lib/api-startup-log'
 import { isRailway, unifiedDeployActive } from '@/lib/resolve-api-url'
 
 export const PROXY_TIMEOUT_DEFAULT_MS = 15_000
@@ -60,7 +61,11 @@ function proxyConnectionHint(): string | undefined {
     return 'DATABASE_URL の参照が未解決です（${{...}}）。変数参照を修正して Redeploy してください。'
   }
   if (status === 'api_exited') {
-    return 'Java API が起動中に終了しました。Railway の Deploy ログで [unified] ERROR を確認してください。'
+    const logHint = inferApiStartupHint(readApiStartupLogTail(30))
+    return (
+      logHint ??
+      'Java API が起動中に終了しました。/status の起動ログまたは Railway Deploy ログで [unified] ERROR を確認してください。'
+    )
   }
   if (isRailway()) {
     return (

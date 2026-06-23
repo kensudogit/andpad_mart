@@ -56,19 +56,8 @@ if [ -z "${DATABASE_URL:-}" ] && [ -n "${DATABASE_PRIVATE_URL:-}" ]; then
   fi
 fi
 
-# Railway Postgres の PG* 変数だけが参照されている場合に DATABASE_URL を組み立てる
-if [ -z "${DATABASE_URL:-}" ] || ref_unresolved "${DATABASE_URL}"; then
-  if [ -n "${PGHOST:-}" ] && ! ref_unresolved "${PGHOST}" && [ -n "${PGUSER:-}" ] && ! ref_unresolved "${PGUSER}"; then
-    _pg_port="${PGPORT:-5432}"
-    _pg_db="${PGDATABASE:-railway}"
-    if [ -n "${PGPASSWORD:-}" ] && ! ref_unresolved "${PGPASSWORD}"; then
-      export DATABASE_URL="postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${_pg_port}/${_pg_db}"
-    else
-      export DATABASE_URL="postgresql://${PGUSER}@${PGHOST}:${_pg_port}/${_pg_db}"
-    fi
-    echo "[unified] built DATABASE_URL from PG* variables"
-  fi
-fi
+# Railway Postgres の PG* 変数は Java 側 (DatabaseUrlSupport) で解決する。
+# シェルで DATABASE_URL を組み立てるとパスワード内の特殊文字で URL が壊れるため行わない。
 
 echo "[unified] web=${WEB_PORT} api=${API_PORT}"
 echo "[unified] DATABASE_URL=$(env_state "${DATABASE_URL:-}")"
@@ -102,9 +91,10 @@ else
   fi
 
   echo "[unified] starting Spring Boot API in background..."
-  API_LOG="/tmp/api.log"
+  mkdir -p /app/data
+  API_LOG="/app/data/api.log"
   : >"${API_LOG}"
-  JAVA_OPTS="${JAVA_OPTS:--XX:+UseContainerSupport -Xmx256m -Xms128m -XX:MaxMetaspaceSize=128m}"
+  JAVA_OPTS="${JAVA_OPTS:--XX:+UseContainerSupport -XX:MaxRAMPercentage=35.0 -XX:InitialRAMPercentage=10.0 -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC}"
 
   (
     export DATABASE_URL="${DATABASE_URL:-}"
@@ -119,6 +109,8 @@ else
     export PGPASSWORD="${PGPASSWORD:-}"
     export PGDATABASE="${PGDATABASE:-}"
     export PGPORT="${PGPORT:-}"
+    export SPRING_MAIN_LAZY_INITIALIZATION="${SPRING_MAIN_LAZY_INITIALIZATION:-true}"
+    export SPRING_FLYWAY_CONNECT_RETRIES="${SPRING_FLYWAY_CONNECT_RETRIES:-10}"
     SERVER_PORT="${API_PORT}" PORT="${API_PORT}" \
       exec java ${JAVA_OPTS} \
         -Dserver.port="${API_PORT}" \
@@ -141,7 +133,7 @@ else
     if ! kill -0 "$API_PID" 2>/dev/null; then
       export UNIFIED_API_STATUS=api_exited
       echo "[unified] ERROR: Java API exited before becoming ready"
-      tail -n 80 "${API_LOG}" 2>/dev/null || true
+      tail -n 80 "${API_LOG}" 2>/dev/null | tee /app/data/api-startup.log || true
       break
     fi
     i=$((i + 1))
@@ -150,7 +142,7 @@ else
   if [ "$api_ready" -eq 0 ] && [ "${UNIFIED_API_STATUS:-}" != "api_exited" ]; then
     export UNIFIED_API_STATUS=api_timeout
     echo "[unified] WARNING: Java API not ready after 180s"
-    tail -n 40 "${API_LOG}" 2>/dev/null || true
+    tail -n 40 "${API_LOG}" 2>/dev/null | tee /app/data/api-startup.log || true
   fi
 fi
 
