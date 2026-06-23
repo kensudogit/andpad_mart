@@ -2,14 +2,70 @@
  * サーバー側プロキシ用 fetch（タイムアウト付き）。
  * auth / graphql ルートから Java API へ転送する際に使用。
  */
-import { dbConfigured } from '@/lib/status-check'
 import { inferApiStartupHint, readApiStartupLogTail } from '@/lib/api-startup-log'
-import { isRailway, unifiedDeployActive } from '@/lib/resolve-api-url'
+import { isRailway, listApiBaseCandidates, unifiedDeployActive } from '@/lib/resolve-api-url'
+import { dbConfigured } from '@/lib/status-check'
 
 export const PROXY_TIMEOUT_DEFAULT_MS = 15_000
 /** OpenAI 連携 mutation（チャット・RAG・AI Board）向け */
 export const PROXY_TIMEOUT_GRAPHQL_POST_MS = 120_000
 export const PROXY_TIMEOUT_AUTH_MS = 20_000
+/** BIM モデル（GLB）アップロード向け */
+export const PROXY_TIMEOUT_BIM_UPLOAD_MS = 120_000
+
+function forwardAuthHeadersFromRequest(request: Request, headers: Headers) {
+  const cookie = request.headers.get('cookie')
+  if (cookie) headers.set('cookie', cookie)
+  const authorization = request.headers.get('authorization')
+  if (authorization) headers.set('authorization', authorization)
+}
+
+/** multipart を再パースせず生ボディのまま Java API へ転送 */
+export async function proxyMultipartToApi(
+  request: Request,
+  apiPath: string,
+  timeoutMs = PROXY_TIMEOUT_BIM_UPLOAD_MS,
+): Promise<Response> {
+  const bases = listApiBaseCandidates()
+  const contentType = request.headers.get('content-type')
+  if (!contentType || !contentType.toLowerCase().includes('multipart/form-data')) {
+    return Response.json({ error: 'multipart/form-data is required' }, { status: 400 })
+  }
+
+  const body = Buffer.from(await request.arrayBuffer())
+  const failures: string[] = []
+
+  for (const base of bases) {
+    const target = `${base}${apiPath}`
+    const headers = new Headers()
+    headers.set('content-type', contentType)
+    forwardAuthHeadersFromRequest(request, headers)
+
+    try {
+      const upstream = await fetchUpstream(
+        target,
+        { method: 'POST', headers, body },
+        timeoutMs,
+      )
+      const text = await upstream.text()
+      const outHeaders = new Headers()
+      const upstreamType = upstream.headers.get('content-type')
+      if (upstreamType) outHeaders.set('content-type', upstreamType)
+      return new Response(text, { status: upstream.status, headers: outHeaders })
+    } catch (err) {
+      failures.push(`${base}: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  }
+
+  const hint = proxyConnectionHint()
+  return Response.json(
+    {
+      error: `Cannot reach API (${failures.join('; ')})`,
+      hint,
+    },
+    { status: 502 },
+  )
+}
 
 /** 上流 API へタイムアウト付き fetch */
 export async function fetchUpstream(

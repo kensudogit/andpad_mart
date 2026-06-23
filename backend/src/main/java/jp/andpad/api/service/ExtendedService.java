@@ -46,7 +46,17 @@ public class ExtendedService {
     }
 
     public BimModel createBimModel(CreateBimModelInput input) {
-        return extendedRepository.createBimModel(TenantContext.orgId(), input);
+        String orgId = TenantContext.orgId();
+        String uploadedBy = TenantContext.principal().map(p -> p.name()).orElse("");
+        CreateBimModelInput withUploader = new CreateBimModelInput(
+                input.projectId(),
+                input.title(),
+                input.format(),
+                input.viewerUrl(),
+                input.thumbnailUrl(),
+                input.fileSizeMb(),
+                input.uploadedBy() != null && !input.uploadedBy().isBlank() ? input.uploadedBy() : uploadedBy);
+        return extendedRepository.createBimModel(orgId, withUploader);
     }
 
     public BimModel updateBimModelThumbnail(String bimModelId, String thumbnailUrl) {

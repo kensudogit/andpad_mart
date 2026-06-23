@@ -104,7 +104,15 @@ public class BimAssetStorage {
             throw new IllegalStateException("failed to store BIM file", ex);
         }
 
-        bimFileRepository.save(orgId, storedName, fileKind, normalizedType, bytes);
+        try {
+            bimFileRepository.save(orgId, storedName, fileKind, normalizedType, bytes);
+        } catch (Exception ex) {
+            log.warn(
+                    "BIM file saved on disk but database persist failed (orgId={} name={}): {}",
+                    orgId,
+                    storedName,
+                    ex.getMessage());
+        }
 
         String publicUrl = "/api/saas/bim/files/" + sanitizeOrgId(orgId) + "/" + storedName;
         log.info("stored BIM {} orgId={} name={} bytes={}", fileKind, orgId, storedName, bytes.length);

@@ -38,11 +38,25 @@ async function uploadBimFile(
 
   if (!res.ok) {
     let message = `upload failed (${res.status})`
-    try {
-      const body = (await res.json()) as { error?: string; message?: string }
-      message = body.error || body.message || message
-    } catch {
-      // ignore parse errors
+    const raw = await res.text()
+    if (raw.trim()) {
+      try {
+        const body = JSON.parse(raw) as {
+          error?: string
+          message?: string
+          path?: string
+        }
+        const detail = body.error || body.message
+        if (detail && detail !== 'Internal Server Error') {
+          message = detail
+        } else if (body.path) {
+          message = `${detail ?? 'upload failed'} (${body.path})`
+        } else if (detail) {
+          message = detail
+        }
+      } catch {
+        message = raw.trim().slice(0, 300)
+      }
     }
     throw new Error(message)
   }

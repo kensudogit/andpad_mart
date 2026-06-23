@@ -78,5 +78,8 @@ export function graphQLErrorHint(message: string | null | undefined): string {
   if (messageLooksSqlError(text)) {
     return 'データベースエラーです。しばらくしてから再読み込みしてください。'
   }
-  return 'API エラーが発生しました。/status で接続状態を確認してください。'
+  if (text.toLowerCase().includes('internal server error')) {
+    return 'サーバー内部エラーです。Redeploy 後に再試行し、/status で API 接続を確認してください。'
+  }
+  return text || 'API エラーが発生しました。/status で接続状態を確認してください。'
 }

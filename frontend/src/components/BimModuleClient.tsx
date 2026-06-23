@@ -76,11 +76,15 @@ export function BimModuleClient() {
     variables: { projectId: projectId || undefined },
     fetchPolicy: 'network-only',
   })
-  const [create, { loading: busy }] = useMutation(CreateBimModelDocument, {
+  const [create, { loading: busy, error: createError }] = useMutation(CreateBimModelDocument, {
     onCompleted: (res) => {
       setTitle('')
+      setUploadMessage(null)
       setSelectedId(res.createBimModel.id)
       refetch()
+    },
+    onError: (err) => {
+      setUploadMessage(graphQLErrorHint(err.message))
     },
   })
 
@@ -234,7 +238,7 @@ export function BimModuleClient() {
             {ui.saasCreate}
           </button>
         </div>
-        {uploadMessage ? (
+        {uploadMessage || createError ? (
           <p
             className={`small${
               uploadMessage === ui.bimUploadDone || uploadMessage === ui.bimModelUploadDone
@@ -242,7 +246,7 @@ export function BimModuleClient() {
                 : ' alert'
             }`}
           >
-            {uploadMessage}
+            {uploadMessage ?? graphQLErrorHint(createError?.message ?? '')}
           </p>
         ) : null}
         {thumbnailUrl ? (

@@ -73,7 +73,7 @@ app:
     api-key: ${OPENAI_API_KEY:}
     model: ${OPENAI_MODEL:gpt-4o-mini}
   bim:
-    upload-dir: ${BIM_UPLOAD_DIR:uploads/bim}
+    upload-dir: ${BIM_UPLOAD_DIR:/app/data/bim-uploads}
     max-image-bytes: ${BIM_MAX_IMAGE_BYTES:5242880}
     max-model-bytes: ${BIM_MAX_MODEL_BYTES:52428800}
     store-in-database: ${BIM_STORE_IN_DATABASE:true}

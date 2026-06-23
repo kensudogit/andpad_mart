@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -265,11 +266,19 @@ public class ExtendedRepository {
         String thumbnailUrl = input.thumbnailUrl() == null || input.thumbnailUrl().isBlank()
                 ? "/bim/thumbs/default.svg"
                 : input.thumbnailUrl();
-        String projectName = jdbc.queryForObject(
-                "SELECT name FROM construction_projects WHERE id = ? AND org_id = ?",
-                String.class,
-                input.projectId(),
-                orgId);
+        String projectName;
+        try {
+            projectName = jdbc.queryForObject(
+                    "SELECT name FROM construction_projects WHERE id = ? AND org_id = ?",
+                    String.class,
+                    input.projectId(),
+                    orgId);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new IllegalArgumentException("project not found: " + input.projectId());
+        }
+        if (input.title() == null || input.title().isBlank()) {
+            throw new IllegalArgumentException("title is required");
+        }
         jdbc.update(
                 """
                 INSERT INTO bim_models (id, org_id, project_id, title, format, viewer_url, thumbnail_url, file_size_mb, status, uploaded_by)

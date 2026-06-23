@@ -34,55 +34,75 @@ public class BimFileController {
     @PostMapping(value = "/upload/thumbnail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Map<String, Object> uploadThumbnail(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "bimModelId", required = false) String bimModelId)
-            throws IOException {
-        String orgId = requireOrgId();
-        StoredBimAsset stored = bimAssetStorage.storeImage(
-                orgId,
-                file.getOriginalFilename(),
-                file.getContentType(),
-                file.getBytes());
-
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("url", stored.url());
-        body.put("fileName", file.getOriginalFilename());
-        body.put("contentType", stored.contentType());
-        body.put("sizeBytes", stored.sizeBytes());
-
-        if (bimModelId != null && !bimModelId.isBlank()) {
-            BimModel updated = extendedService.updateBimModelThumbnail(bimModelId, stored.url());
-            body.put("bimModelId", updated.id());
-            body.put("bimModel", updated);
-        }
-        return body;
+            @RequestParam(value = "bimModelId", required = false) String bimModelId) {
+        return storeThumbnail(file, bimModelId);
     }
 
     @PostMapping(value = "/upload/model", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Map<String, Object> uploadModel(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "bimModelId", required = false) String bimModelId)
-            throws IOException {
-        String orgId = requireOrgId();
-        StoredBimAsset stored = bimAssetStorage.storeModel(
-                orgId,
-                file.getOriginalFilename(),
-                file.getContentType(),
-                file.getBytes());
+            @RequestParam(value = "bimModelId", required = false) String bimModelId) {
+        return storeModel(file, bimModelId);
+    }
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("url", stored.url());
-        body.put("fileName", file.getOriginalFilename());
-        body.put("contentType", stored.contentType());
-        body.put("sizeBytes", stored.sizeBytes());
-        body.put("fileSizeMb", stored.sizeBytes() / (1024.0 * 1024.0));
+    private Map<String, Object> storeThumbnail(MultipartFile file, String bimModelId) {
+        try {
+            if (file == null || file.isEmpty()) {
+                throw new IllegalArgumentException("file is required");
+            }
+            String orgId = requireOrgId();
+            StoredBimAsset stored = bimAssetStorage.storeImage(
+                    orgId,
+                    file.getOriginalFilename(),
+                    file.getContentType(),
+                    file.getBytes());
 
-        if (bimModelId != null && !bimModelId.isBlank()) {
-            BimModel updated = extendedService.updateBimModelViewer(
-                    bimModelId, stored.url(), stored.sizeBytes() / (1024.0 * 1024.0));
-            body.put("bimModelId", updated.id());
-            body.put("bimModel", updated);
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("url", stored.url());
+            body.put("fileName", file.getOriginalFilename());
+            body.put("contentType", stored.contentType());
+            body.put("sizeBytes", stored.sizeBytes());
+
+            if (bimModelId != null && !bimModelId.isBlank()) {
+                BimModel updated = extendedService.updateBimModelThumbnail(bimModelId, stored.url());
+                body.put("bimModelId", updated.id());
+                body.put("bimModel", updated);
+            }
+            return body;
+        } catch (IOException ex) {
+            throw new IllegalStateException("failed to read uploaded file", ex);
         }
-        return body;
+    }
+
+    private Map<String, Object> storeModel(MultipartFile file, String bimModelId) {
+        try {
+            if (file == null || file.isEmpty()) {
+                throw new IllegalArgumentException("file is required");
+            }
+            String orgId = requireOrgId();
+            StoredBimAsset stored = bimAssetStorage.storeModel(
+                    orgId,
+                    file.getOriginalFilename(),
+                    file.getContentType(),
+                    file.getBytes());
+
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("url", stored.url());
+            body.put("fileName", file.getOriginalFilename());
+            body.put("contentType", stored.contentType());
+            body.put("sizeBytes", stored.sizeBytes());
+            body.put("fileSizeMb", stored.sizeBytes() / (1024.0 * 1024.0));
+
+            if (bimModelId != null && !bimModelId.isBlank()) {
+                BimModel updated = extendedService.updateBimModelViewer(
+                        bimModelId, stored.url(), stored.sizeBytes() / (1024.0 * 1024.0));
+                body.put("bimModelId", updated.id());
+                body.put("bimModel", updated);
+            }
+            return body;
+        } catch (IOException ex) {
+            throw new IllegalStateException("failed to read uploaded file", ex);
+        }
     }
 
     @GetMapping("/files/{orgId}/{fileName}")

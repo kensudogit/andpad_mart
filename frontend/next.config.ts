@@ -7,6 +7,9 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname, '..'),
   transpilePackages: ['@apollo/client'],
+  serverActions: {
+    bodySizeLimit: '60mb',
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'placehold.co', pathname: '/**' },

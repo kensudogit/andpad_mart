@@ -55,7 +55,15 @@ public class GraphQlExceptionResolver implements DataFetcherExceptionResolver {
                             .message(sanitizeDataAccessMessage(dataAccess))
                             .build()));
         }
-        return Mono.empty();
+        String message = ex.getMessage();
+        if (message == null || message.isBlank()) {
+            message = ex.getClass().getSimpleName();
+        }
+        return Mono.just(List.of(
+                GraphqlErrorBuilder.newError(env)
+                        .errorType(ErrorType.INTERNAL_ERROR)
+                        .message(message)
+                        .build()));
     }
 
     private static String sanitizeDataAccessMessage(DataAccessException ex) {
@@ -66,6 +74,9 @@ public class GraphQlExceptionResolver implements DataFetcherExceptionResolver {
         }
         if (message.contains("tenant_applications") && message.contains("does not exist")) {
             return "tenant_applications table is missing; apply database migration V015";
+        }
+        if (message.contains("bim_uploaded_files") && message.contains("does not exist")) {
+            return "bim_uploaded_files table is missing; apply database migration V021";
         }
         return message;
     }
