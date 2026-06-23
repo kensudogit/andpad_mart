@@ -1,6 +1,11 @@
 /** BIM サムネイル種別（DB / タイトル / フォーマットから解決）。 */
 export type BimThumbKind = 'default' | 'structure' | 'equipment' | 'renovation'
 
+/** 自前ホストの glTF サンプル（アップロード検証・オフライン用） */
+export const BIM_SAMPLE_MODEL_LOCAL_GLTF = '/bim/samples/andpad-sample.gltf'
+export const BIM_SAMPLE_MODEL_LOCAL_GLTF_EMBEDDED = '/bim/samples/andpad-sample-embedded.gltf'
+export const BIM_SAMPLE_MODEL_LOCAL_GLB = '/bim/samples/andpad-sample.glb'
+
 export const BIM_SAMPLE_MODEL_HELMET =
   'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb'
 
@@ -39,9 +44,13 @@ export function resolveBimViewerUrl(format?: string | null, viewerUrl?: string |
   if (url && !url.includes('modelviewer.dev') && (url.endsWith('.glb') || url.endsWith('.gltf'))) {
     return url
   }
+  if (url.startsWith('/bim/samples/')) {
+    return url
+  }
   const fmt = (format ?? '').toLowerCase()
   if (fmt.includes('gltf') || fmt === 'glb') {
     if (url.includes('Astronaut')) return BIM_SAMPLE_MODEL_ASTRONAUT
+    if (url.includes('andpad-sample') || !url) return BIM_SAMPLE_MODEL_LOCAL_GLTF
     return BIM_SAMPLE_MODEL_HELMET
   }
   return url

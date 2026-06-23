@@ -13,7 +13,7 @@ import {
   CreateBimModelDocument,
 } from '@/lib/generated/graphql'
 import {
-  BIM_SAMPLE_MODEL_HELMET,
+  BIM_SAMPLE_MODEL_LOCAL_GLTF,
   canUseModelViewer,
   defaultThumbnailForFormat,
   getBimThumbKind,
@@ -62,7 +62,7 @@ function useModelViewerReady() {
 export function BimModuleClient() {
   const [title, setTitle] = useState('')
   const [format, setFormat] = useState('glTF')
-  const [viewerUrl, setViewerUrl] = useState(BIM_SAMPLE_MODEL_HELMET)
+  const [viewerUrl, setViewerUrl] = useState(BIM_SAMPLE_MODEL_LOCAL_GLTF)
   const [thumbnailUrl, setThumbnailUrl] = useState(defaultThumbnailForFormat('glTF'))
   const [fileSize, setFileSize] = useState('')
   const [projectId, setProjectId] = useState('')
