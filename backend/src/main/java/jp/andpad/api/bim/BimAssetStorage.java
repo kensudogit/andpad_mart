@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
@@ -15,12 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import jp.andpad.api.repository.BimFileRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class BimAssetStorage {
 
     public static final String KIND_THUMBNAIL = "THUMBNAIL";
@@ -43,6 +42,7 @@ public class BimAssetStorage {
     private final long maxImageBytes;
     private final long maxModelBytes;
 
+    @Autowired
     public BimAssetStorage(
             BimFileRepository bimFileRepository,
             @Value("${app.bim.upload-dir:uploads/bim}") String uploadDir,
