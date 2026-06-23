@@ -5,8 +5,9 @@
  */
 import Link from 'next/link'
 import { useMutation, useQuery } from '@apollo/client/react'
-import { createElement, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BimModelThumbnail } from '@/components/BimModelThumbnail'
+import { BimModelViewer, useModelViewerReady } from '@/components/BimModelViewer'
 import {
   BimModelsDocument,
   ConstructionProjectsDocument,
@@ -21,42 +22,9 @@ import {
   resolveBimViewerUrl,
 } from '@/lib/bim-assets'
 import { uploadBimModel, uploadBimThumbnail } from '@/lib/bim-upload'
+import { detectBimFileKind } from '@/lib/bim-file-kind'
 import { graphQLErrorHint, isAuthRequiredGraphQLError } from '@/lib/graphql-errors'
 import { ui } from '@/lib/ui'
-
-const MODEL_VIEWER_SRC =
-  'https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js'
-
-function useModelViewerReady() {
-  const [ready, setReady] = useState(false)
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const markReady = () => {
-      if (customElements.get('model-viewer')) {
-        setReady(true)
-        return true
-      }
-      return false
-    }
-
-    if (markReady()) return
-
-    customElements.whenDefined('model-viewer').then(() => setReady(true))
-
-    const existing = document.querySelector(`script[src="${MODEL_VIEWER_SRC}"]`)
-    if (!existing) {
-      const script = document.createElement('script')
-      script.type = 'module'
-      script.src = MODEL_VIEWER_SRC
-      script.async = true
-      document.head.appendChild(script)
-    }
-  }, [])
-
-  return ready
-}
 
 /** BIM モデル一覧・登録・3D ビューワ */
 export function BimModuleClient() {
@@ -103,11 +71,7 @@ export function BimModuleClient() {
     if (!selectedId && models.length > 0) setSelectedId(models[0].id)
   }, [projectId, projects, selectedId, models])
 
-  async function handleThumbnailUpload(file: File, targetModelId?: string) {
-    if (file.name.toLowerCase().endsWith('.glb') || file.name.toLowerCase().endsWith('.gltf')) {
-      setUploadMessage('GLB/GLTF は「3Dモデルファイルをアップロード」から登録してください')
-      return
-    }
+  async function uploadThumbnailFile(file: File, targetModelId?: string) {
     setUploadBusy(true)
     setUploadMessage(null)
     try {
@@ -125,12 +89,7 @@ export function BimModuleClient() {
     }
   }
 
-  async function handleModelUpload(file: File, targetModelId?: string) {
-    const lower = file.name.toLowerCase()
-    if (!lower.endsWith('.glb') && !lower.endsWith('.gltf')) {
-      setUploadMessage('3Dモデルは .glb または .gltf ファイルを選択してください')
-      return
-    }
+  async function uploadModelFile(file: File, targetModelId?: string) {
     setUploadBusy(true)
     setUploadMessage(null)
     try {
@@ -150,6 +109,17 @@ export function BimModuleClient() {
     } finally {
       setUploadBusy(false)
     }
+  }
+
+  async function handleBimFileUpload(file: File, targetModelId?: string) {
+    const kind = detectBimFileKind(file)
+    if (kind === 'model') {
+      return uploadModelFile(file, targetModelId)
+    }
+    if (kind === 'image') {
+      return uploadThumbnailFile(file, targetModelId)
+    }
+    setUploadMessage(ui.bimUploadUnknownType)
   }
 
   if (loading) return <p className="muted">{ui.boardLoading}</p>
@@ -199,12 +169,12 @@ export function BimModuleClient() {
             {uploadBusy ? ui.bimUploading : ui.bimUploadModel}
             <input
               type="file"
-              accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+              accept=".glb,.gltf,.png,.jpg,.jpeg,.webp,.gif,.svg,image/*,model/gltf-binary,model/gltf+json"
               className="bim-upload-input"
               disabled={uploadBusy}
               onChange={(e) => {
                 const file = e.target.files?.[0]
-                if (file) void handleModelUpload(file)
+                if (file) void handleBimFileUpload(file)
                 e.target.value = ''
               }}
             />
@@ -214,12 +184,12 @@ export function BimModuleClient() {
             {uploadBusy ? ui.bimUploading : ui.bimUploadThumbnail}
             <input
               type="file"
-              accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+              accept=".glb,.gltf,.png,.jpg,.jpeg,.webp,.gif,.svg,image/*,model/gltf-binary,model/gltf+json"
               className="bim-upload-input"
               disabled={uploadBusy}
               onChange={(e) => {
                 const file = e.target.files?.[0]
-                if (file) void handleThumbnailUpload(file)
+                if (file) void handleBimFileUpload(file)
                 e.target.value = ''
               }}
             />
@@ -318,12 +288,12 @@ export function BimModuleClient() {
                   {uploadBusy ? ui.bimUploading : ui.bimUpdateModel}
                   <input
                     type="file"
-                    accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+                    accept=".glb,.gltf,.png,.jpg,.jpeg,.webp,.gif,.svg,image/*,model/gltf-binary,model/gltf+json"
                     className="bim-upload-input"
                     disabled={uploadBusy}
                     onChange={(e) => {
                       const file = e.target.files?.[0]
-                      if (file) void handleModelUpload(file, selected.id)
+                      if (file) void handleBimFileUpload(file, selected.id)
                       e.target.value = ''
                     }}
                   />
@@ -332,12 +302,12 @@ export function BimModuleClient() {
                   {uploadBusy ? ui.bimUploading : ui.bimUpdateThumbnail}
                   <input
                     type="file"
-                    accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                    accept=".glb,.gltf,.png,.jpg,.jpeg,.webp,.gif,.svg,image/*,model/gltf-binary,model/gltf+json"
                     className="bim-upload-input"
                     disabled={uploadBusy}
                     onChange={(e) => {
                       const file = e.target.files?.[0]
-                      if (file) void handleThumbnailUpload(file, selected.id)
+                      if (file) void handleBimFileUpload(file, selected.id)
                       e.target.value = ''
                     }}
                   />
@@ -345,17 +315,11 @@ export function BimModuleClient() {
               </div>
               <div className="bim-viewer-frame">
                 {showModelViewer && modelViewerReady ? (
-                  createElement('model-viewer', {
-                    key: `${selected.id}:${selectedViewerUrl}`,
-                    src: selectedViewerUrl,
-                    alt: selected.title,
-                    'camera-controls': true,
-                    'auto-rotate': true,
-                    'shadow-intensity': '1',
-                    'environment-image': 'neutral',
-                    'exposure': '1',
-                    style: { width: '100%', height: '100%', background: '#1a1f2e' },
-                  })
+                  <BimModelViewer
+                    key={`${selected.id}:${selectedViewerUrl}`}
+                    src={selectedViewerUrl}
+                    alt={selected.title}
+                  />
                 ) : showModelViewer ? (
                   <div className="bim-viewer-poster">
                     <BimModelThumbnail
