@@ -1,7 +1,7 @@
 /**
  * BIM 3D モデル取得（認証付き API パス対応）。
  */
-import { isUploadedBimAsset } from '@/lib/bim-assets'
+import { BIM_MIN_MODEL_BYTES, isUploadedBimAsset } from '@/lib/bim-assets'
 import { getAuthToken } from '@/lib/auth-session'
 
 type GltfDocument = {
@@ -55,9 +55,19 @@ function bytesToBase64(bytes: Uint8Array): string {
   return btoa(binary)
 }
 
-async function fetchAuthedBytes(url: string): Promise<{ buffer: ArrayBuffer; contentType: string | null }> {
-  const res = await fetch(url, { credentials: 'include', headers: authHeaders() })
+async function fetchModelBytes(url: string): Promise<{ buffer: ArrayBuffer; contentType: string | null }> {
+  const isApi = isUploadedBimAsset(url)
+  const target = isApi ? buildAuthedModelUrl(url) : url
+  const res = await fetch(
+    target,
+    isApi
+      ? { credentials: 'include', headers: authHeaders() }
+      : { credentials: 'omit', mode: 'cors' },
+  )
   if (!res.ok) {
+    if (!isApi && res.status === 403) {
+      throw new Error('外部 CDN のモデル取得が拒否されました。GLB ファイルをアップロードしてください')
+    }
     throw new Error(`モデルの読み込みに失敗しました (${res.status})`)
   }
   const buffer = await res.arrayBuffer()
@@ -71,6 +81,11 @@ async function fetchAuthedBytes(url: string): Promise<{ buffer: ArrayBuffer; con
 function assertRecognizedModel(buffer: ArrayBuffer) {
   if (buffer.byteLength === 0) {
     throw new Error('モデルファイルが空です。GLB 形式で再アップロードしてください')
+  }
+  if (buffer.byteLength < BIM_MIN_MODEL_BYTES) {
+    throw new Error(
+      `モデルファイルが小さすぎます（${buffer.byteLength} バイト）。単一ファイルの GLB を再アップロードしてください`,
+    )
   }
   const bytes = new Uint8Array(buffer)
   if (isGlbBytes(bytes) || looksLikeGltfJson(bytes)) return
@@ -99,14 +114,17 @@ async function embedGltfExternalBuffers(
     const uri = buffer.uri?.trim()
     if (!uri || uri.startsWith('data:')) continue
 
-    const resourceUrl = buildAuthedModelUrl(new URL(uri, baseUrl).toString())
+    const resourceUrl = new URL(uri, baseUrl).toString()
     try {
-      const { buffer: resourceBytes } = await fetchAuthedBytes(resourceUrl)
+      const { buffer: resourceBytes } = await fetchModelBytes(resourceUrl)
+      if (resourceBytes.byteLength < BIM_MIN_MODEL_BYTES) {
+        throw new Error('too small')
+      }
       const encoded = new Uint8Array(resourceBytes)
       buffer.uri = `data:application/octet-stream;base64,${bytesToBase64(encoded)}`
     } catch {
       throw new Error(
-        'GLTF に外部 .bin 参照があります。単一ファイルの GLB 形式で再アップロードしてください',
+        'GLTF の関連ファイルを取得できません。単一ファイルの GLB 形式で再アップロードしてください',
       )
     }
   }
@@ -141,7 +159,7 @@ export async function resolveBimModelObjectUrl(sourceUrl: string): Promise<Resol
     return { url: trimmed, revoke: () => {} }
   }
 
-  const { buffer } = await fetchAuthedBytes(trimmed)
+  const { buffer } = await fetchModelBytes(trimmed)
   assertRecognizedModel(buffer)
   const bytes = new Uint8Array(buffer)
 

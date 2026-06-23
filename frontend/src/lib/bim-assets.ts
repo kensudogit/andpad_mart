@@ -1,16 +1,28 @@
 /** BIM サムネイル種別（DB / タイトル / フォーマットから解決）。 */
 export type BimThumbKind = 'default' | 'structure' | 'equipment' | 'renovation'
 
-/** 自前ホストの glTF サンプル（アップロード検証・オフライン用） */
+/** 自前ホストの glTF サンプル（CDN 403 回避・オフライン用） */
 export const BIM_SAMPLE_MODEL_LOCAL_GLTF = '/bim/samples/andpad-sample.gltf'
 export const BIM_SAMPLE_MODEL_LOCAL_GLTF_EMBEDDED = '/bim/samples/andpad-sample-embedded.gltf'
 export const BIM_SAMPLE_MODEL_LOCAL_GLB = '/bim/samples/andpad-sample.glb'
 
-export const BIM_SAMPLE_MODEL_HELMET =
-  'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb'
+/** モデルとして扱う最小サイズ（バイト） */
+export const BIM_MIN_MODEL_BYTES = 500
 
-export const BIM_SAMPLE_MODEL_ASTRONAUT =
-  'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/Astronaut/glTF-Binary/Astronaut.glb'
+const EXTERNAL_VIEWER_HOSTS = ['cdn.jsdelivr.net', 'modelviewer.dev', 'khronosgroup']
+
+export function isBrokenExternalViewerUrl(url?: string | null): boolean {
+  const lower = (url ?? '').trim().toLowerCase()
+  if (!lower.startsWith('http')) return false
+  return EXTERNAL_VIEWER_HOSTS.some((host) => lower.includes(host))
+}
+
+export function remapExternalBimViewerUrl(url: string): string {
+  const trimmed = url.trim()
+  if (!trimmed) return BIM_SAMPLE_MODEL_LOCAL_GLB
+  if (isBrokenExternalViewerUrl(trimmed)) return BIM_SAMPLE_MODEL_LOCAL_GLB
+  return trimmed
+}
 
 export function getBimThumbKind(
   title?: string | null,
@@ -37,11 +49,11 @@ export function canUseModelViewer(format?: string | null, viewerUrl?: string | n
 }
 
 export function resolveBimViewerUrl(format?: string | null, viewerUrl?: string | null) {
-  const url = (viewerUrl ?? '').trim()
+  const url = remapExternalBimViewerUrl((viewerUrl ?? '').trim())
   if (url.includes('/api/saas/bim/files/')) {
     return url
   }
-  if (url && !url.includes('modelviewer.dev') && (url.endsWith('.glb') || url.endsWith('.gltf'))) {
+  if (url && (url.endsWith('.glb') || url.endsWith('.gltf'))) {
     return url
   }
   if (url.startsWith('/bim/samples/')) {
@@ -49,9 +61,7 @@ export function resolveBimViewerUrl(format?: string | null, viewerUrl?: string |
   }
   const fmt = (format ?? '').toLowerCase()
   if (fmt.includes('gltf') || fmt === 'glb') {
-    if (url.includes('Astronaut')) return BIM_SAMPLE_MODEL_ASTRONAUT
-    if (url.includes('andpad-sample') || !url) return BIM_SAMPLE_MODEL_LOCAL_GLTF_EMBEDDED
-    return BIM_SAMPLE_MODEL_HELMET
+    return BIM_SAMPLE_MODEL_LOCAL_GLB
   }
   return url
 }
@@ -75,4 +85,12 @@ export function defaultThumbnailForFormat(format: string) {
   if (fmt === 'ifc' || fmt === 'revit') return defaultThumbnailPath('equipment')
   if (fmt.includes('gltf') || fmt === 'glb') return defaultThumbnailPath('structure')
   return defaultThumbnailPath('default')
+}
+
+export function isTooSmallBimModel(fileSizeMb?: number | null, sizeBytes?: number | null): boolean {
+  if (sizeBytes != null && sizeBytes > 0) {
+    return sizeBytes < BIM_MIN_MODEL_BYTES
+  }
+  if (fileSizeMb == null) return false
+  return fileSizeMb * 1024 * 1024 < BIM_MIN_MODEL_BYTES
 }

@@ -1,6 +1,7 @@
 /**
  * BIM ファイルアップロード（サムネイル / 3D モデル）。
  */
+import { BIM_MIN_MODEL_BYTES } from '@/lib/bim-assets'
 import { getAuthToken } from '@/lib/auth-session'
 
 export type BimUploadResult = {
@@ -18,6 +19,9 @@ function translateUploadError(message: string): string {
   }
   if (message.includes('file is empty')) {
     return 'ファイルが空です。別の GLB ファイルを選択してください'
+  }
+  if (message.includes('too small')) {
+    return `3Dモデルファイルが小さすぎます（${BIM_MIN_MODEL_BYTES} バイト未満）。単一ファイルの GLB を選択してください`
   }
   return message
 }
@@ -79,6 +83,11 @@ export async function uploadBimThumbnail(file: File, bimModelId?: string) {
 }
 
 export async function uploadBimModel(file: File, bimModelId?: string) {
+  if (file.size < BIM_MIN_MODEL_BYTES) {
+    throw new Error(
+      `3Dモデルファイルが小さすぎます（${file.size} バイト）。単一ファイルの GLB を選択してください`,
+    )
+  }
   return uploadBimFile('/api/saas/bim/upload/model', file, bimModelId)
 }
 

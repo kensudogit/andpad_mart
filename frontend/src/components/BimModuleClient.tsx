@@ -14,11 +14,12 @@ import {
   CreateBimModelDocument,
 } from '@/lib/generated/graphql'
 import {
-  BIM_SAMPLE_MODEL_LOCAL_GLTF_EMBEDDED,
+  BIM_SAMPLE_MODEL_LOCAL_GLB,
   canUseModelViewer,
   defaultThumbnailForFormat,
   getBimThumbKind,
   isEmbeddableViewerPage,
+  isTooSmallBimModel,
   resolveBimViewerUrl,
 } from '@/lib/bim-assets'
 import { uploadBimModel, uploadBimThumbnail } from '@/lib/bim-upload'
@@ -30,7 +31,7 @@ import { ui } from '@/lib/ui'
 export function BimModuleClient() {
   const [title, setTitle] = useState('')
   const [format, setFormat] = useState('glTF')
-  const [viewerUrl, setViewerUrl] = useState(BIM_SAMPLE_MODEL_LOCAL_GLTF_EMBEDDED)
+  const [viewerUrl, setViewerUrl] = useState(BIM_SAMPLE_MODEL_LOCAL_GLB)
   const [thumbnailUrl, setThumbnailUrl] = useState(defaultThumbnailForFormat('glTF'))
   const [fileSize, setFileSize] = useState('')
   const [projectId, setProjectId] = useState('')
@@ -60,6 +61,7 @@ export function BimModuleClient() {
   const models = data?.bimModels ?? []
   const selected = models.find((m) => m.id === selectedId) ?? models[0] ?? null
   const selectedViewerUrl = selected ? resolveBimViewerUrl(selected.format, selected.viewerUrl) : ''
+  const selectedModelTooSmall = selected ? isTooSmallBimModel(selected.fileSizeMb) : false
   const showModelViewer = selected ? canUseModelViewer(selected.format, selected.viewerUrl) : false
   const showIframe = selected ? isEmbeddableViewerPage(selected.viewerUrl) : false
   const selectedThumbKind = selected
@@ -314,7 +316,11 @@ export function BimModuleClient() {
                 </label>
               </div>
               <div className="bim-viewer-frame">
-                {showModelViewer && modelViewerReady ? (
+                {selectedModelTooSmall ? (
+                  <div className="bim-viewer-poster">
+                    <p className="alert small">{ui.bimViewerModelTooSmall}</p>
+                  </div>
+                ) : showModelViewer && modelViewerReady ? (
                   <BimModelViewer
                     key={`${selected.id}:${selectedViewerUrl}`}
                     src={selectedViewerUrl}

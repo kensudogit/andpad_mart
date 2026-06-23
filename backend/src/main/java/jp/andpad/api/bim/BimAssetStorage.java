@@ -86,6 +86,10 @@ public class BimAssetStorage {
         if (bytes == null || bytes.length == 0) {
             throw new IllegalArgumentException("file is empty");
         }
+        if (KIND_MODEL.equals(fileKind) && bytes.length < 500) {
+            throw new IllegalArgumentException(
+                    "3D model file is too small (" + bytes.length + " bytes); upload a single .glb file");
+        }
         if (bytes.length > maxBytes) {
             throw new IllegalArgumentException("file exceeds max size (" + maxBytes + " bytes)");
         }

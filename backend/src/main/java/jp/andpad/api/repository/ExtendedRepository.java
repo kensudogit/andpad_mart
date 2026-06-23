@@ -261,7 +261,7 @@ public class ExtendedRepository {
         String id = Ids.random("bim_");
         String format = input.format() == null || input.format().isBlank() ? "IFC" : input.format();
         String viewerUrl = input.viewerUrl() == null || input.viewerUrl().isBlank()
-                ? "https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"
+                ? "/bim/samples/andpad-sample.glb"
                 : input.viewerUrl();
         String thumbnailUrl = input.thumbnailUrl() == null || input.thumbnailUrl().isBlank()
                 ? "/bim/thumbs/default.svg"

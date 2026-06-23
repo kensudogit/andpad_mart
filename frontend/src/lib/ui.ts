@@ -384,6 +384,8 @@ export const ui = {
     'IFC / Revit \u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u306f\u30b5\u30e0\u30cd\u30a4\u30eb\u8868\u793a\u3067\u3059\u3002glTF / GLB \u306e\u5834\u5408\u306f 3D \u30d3\u30e5\u30fc\u30ef\u30fc\u3067\u95b2\u89a7\u3067\u304d\u307e\u3059\u3002',
   bimViewerLoading: '3D\u30e2\u30c7\u30eb\u3092\u8aad\u307f\u8fbc\u3093\u3067\u3044\u307e\u3059\u2026',
   bimViewerLoadError: '3D\u30e2\u30c7\u30eb\u306e\u8868\u793a\u306b\u5931\u6557\u3057\u307e\u3057\u305f',
+  bimViewerModelTooSmall:
+    'モデルファイルが小さすぎるか破損しています。「3Dファイルを更新」から単一ファイルの GLB を再アップロードしてください',
   bimUploadUnknownType:
     '対応していないファイル形式です。3Dモデルは .glb / .gltf、サムネイルは画像（PNG / JPEG など）を選択してください',
   edeliveryStatusSubmitted: '\u63d0\u51fa\u6e08',

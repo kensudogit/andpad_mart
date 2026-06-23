@@ -172,7 +172,6 @@ export function BimModelViewer({ src, alt }: BimModelViewerProps) {
     'interaction-prompt': 'none',
     'draco-decoder-path': DRACO_DECODER_PATH,
     'ktx2-transcoder-path': KTX2_TRANSCODER_PATH,
-    'environment-image': 'legacy',
     style: {
       width: '100%',
       height: '100%',

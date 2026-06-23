@@ -215,10 +215,10 @@ public class OrgSampleDataSeeder {
                 INSERT INTO bim_models (id, org_id, project_id, title, format, viewer_url, thumbnail_url, file_size_mb, status, uploaded_by)
                 VALUES
                   (?, ?, ?, '本館構造BIMモデル v2', 'glTF',
-                          'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+                          '/bim/samples/andpad-sample.glb',
                           '/bim/thumbs/structure.svg', 128.5, 'READY', '山田 太郎'),
                   (?, ?, ?, '改修計画BIM', 'glTF',
-                          'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/Astronaut/glTF-Binary/Astronaut.glb',
+                          '/bim/samples/andpad-sample.glb',
                           '/bim/thumbs/renovation.svg', 42.0, 'PROCESSING', '佐藤 花子'),
                   (?, ?, ?, '設備BIMモデル v1', 'IFC', '', '/bim/thumbs/equipment.svg', 86.2, 'READY', '佐藤 花子')
                 ON CONFLICT (id) DO UPDATE SET
