@@ -1,5 +1,9 @@
 # ANDPAD intra-mart 版 (`andpad_mart`)
 
+> **Enterprise Integration / intra-mart Edition** — Extends the Java/Spring GraphQL architecture with an intra-mart integration layer, WAR deployment, session integration, authorization, and reusable approval workflows.
+>
+> **Series:** [Go baseline](https://github.com/kensudogit/andpad) · [Java](https://github.com/kensudogit/andpad_j) · [Kotlin](https://github.com/kensudogit/andpad_kot) · **intra-mart**
+
 [`andpad_j`](../andpad_j) の **Java バックエンド（`jp.andpad.api`）** を intra-mart 開発環境向けに移植したリポジトリです。  
 Spring Boot 3 + GraphQL + Next.js 15 に加え、**intra-mart プラグイン統合レイヤー（`jp.andpad.imart`）** を提供します。
 
